@@ -1,10 +1,11 @@
 # Stage 1: Build & Development
 FROM node:lts-alpine as build-stage
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install
 COPY . .
-RUN npm run build
+RUN pnpm run build
 # For development, we just keep the files here.
 # For production, we would run 'npm run build'
 
