@@ -5,7 +5,6 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install
 COPY . .
-RUN pnpm run build
 # For development, we just keep the files here.
 # For production, we would run 'npm run build'
 

@@ -3,11 +3,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: build-stage
     ports:
-      - "5173:5173"  # Maps container port to your Windows port
+      - "3000:3000"  # Maps container port to your Windows port
     volumes:
       - .:/app       # This maps your local folder to the container
       - /app/node_modules # Prevents local node_modules from overwriting container's
     environment:
       - CHOKIDAR_USEPOLLING=true # Helps Hot Reload work on Windows/WSL
-    command: pnpm dev --host
+    command: pnpm dev --host --port 3000
