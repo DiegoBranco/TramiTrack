@@ -18,31 +18,37 @@ pipeline {
         }
         stage('Build Backend') {
             steps {
-            sh '''
-            docker build \
-            -t ${BACKEND_IMAGE}:latest \
-            server
-            '''
+                dir('tramitrack') {
+                    sh '''
+                    docker build \
+                    -t ${BACKEND_IMAGE}:latest \
+                    server
+                    '''
+                }
             }
         }
         stage('Build Frontend') {
             steps {
-            sh '''
-            docker build \
-            -f Dockerfile \
-            -t ${FRONTEND_IMAGE}:build \
-            .
-            '''
+                dir('tramitrack') {
+                    sh '''
+                    docker build \
+                    -f Dockerfile \
+                    -t ${FRONTEND_IMAGE}:build \
+                    .
+                    '''
+                }
             }
         }
         stage('Frontend Production Image') {
             steps {
-            sh '''
-            docker build \
-            -f Dockerfile.prod \
-            -t ${FRONTEND_IMAGE}:prod \
-            .
-            '''
+                dir('tramitrack') {
+                    sh '''
+                    docker build \
+                    -f Dockerfile.prod \
+                    -t ${FRONTEND_IMAGE}:prod \
+                    .
+                    '''
+                }
             }
         }
         stage('Unit Tests') {
@@ -54,10 +60,12 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    sh '''
-                    docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-                    docker run --rm ${API_TEST_IMAGE} newman run coleccion.postman_collection.json -e entorno.postman_environment.json
-                    '''
+                        dir('tramitrack') {
+                            sh '''
+                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+                            docker run --rm ${API_TEST_IMAGE} newman run coleccion.postman_collection.json -e entorno.postman_environment.json
+                            '''
+                        }
                     }
                 }
             }
@@ -71,10 +79,12 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    sh '''
-                    docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
-                    docker run --rm ${E2E_IMAGE}
-                    '''
+                        dir('tramitrack') {
+                            sh '''
+                            docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
+                            docker run --rm ${E2E_IMAGE}
+                            '''
+                        }
                     }
                 }
             }
@@ -88,10 +98,12 @@ pipeline {
         steps {
             script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                sh '''
-                docker build -f tests/performance/Dockerfile.performance -t ${PERF_IMAGE} tests/performance
-                docker run --rm ${PERF_IMAGE}
-                '''
+                        dir('tramitrack') {
+                            sh '''
+                            docker build -f tests/performance/Dockerfile.performance -t ${PERF_IMAGE} tests/performance
+                            docker run --rm ${PERF_IMAGE}
+                            '''
+                        }
                 }
             }
         }
