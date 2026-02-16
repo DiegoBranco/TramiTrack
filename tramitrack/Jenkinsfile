@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:latest'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
     environment {
         FRONTEND_IMAGE = "tramitrack-frontend"
         BACKEND_IMAGE = "tramitrack-backend"
@@ -10,6 +15,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+            sh 'apk add --no-cache git docker-cli'
             checkout scm
             }
         }
@@ -107,7 +113,13 @@ pipeline {
         echo 'Pipeline finalizado: Error critico en el proceso'
         }
     always {
-        sh 'docker system prune -f'
+        script {
+            try {
+                sh 'docker system prune -f'
+            } catch (Exception e) {
+                echo "Warning: Failed to run docker prune: ${e.getMessage()}"
+            }
+        }
         }
     }
 }
