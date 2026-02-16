@@ -32,7 +32,7 @@ pipeline {
                 dir('tramitrack') {
                     sh '''
                     docker build \
-                    -f Dockerfile \
+                    -f dockerfile \
                     -t ${FRONTEND_IMAGE}:build \
                     .
                     '''
@@ -44,7 +44,7 @@ pipeline {
                 dir('tramitrack') {
                     sh '''
                     docker build \
-                    -f Dockerfile.prod \
+                    -f dockerfile.prod \
                     -t ${FRONTEND_IMAGE}:prod \
                     .
                     '''
@@ -62,7 +62,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack') {
                             sh '''
-                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+                            docker build -f tests/api/dockerfile.test -t ${API_TEST_IMAGE} tests/api
                             docker run --rm ${API_TEST_IMAGE} newman run coleccion.postman_collection.json -e entorno.postman_environment.json
                             '''
                         }
@@ -81,7 +81,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack') {
                             sh '''
-                            docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
+                            docker build -f tests/e2e/dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
                             docker run --rm ${E2E_IMAGE}
                             '''
                         }
@@ -100,7 +100,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack') {
                             sh '''
-                            docker build -f tests/performance/Dockerfile.performance -t ${PERF_IMAGE} tests/performance
+                            docker build -f tests/performance/dockerfile.performance -t ${PERF_IMAGE} tests/performance
                             docker run --rm ${PERF_IMAGE}
                             '''
                         }
