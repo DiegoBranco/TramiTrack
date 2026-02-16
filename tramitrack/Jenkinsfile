@@ -6,6 +6,7 @@ pipeline {
         }
     }
     environment {
+        PATH = "${WORKSPACE}/bin:${env.PATH}"
         FRONTEND_IMAGE = "tramitrack-frontend"
         BACKEND_IMAGE = "tramitrack-backend"
         API_TEST_IMAGE = "api-tests"
@@ -15,7 +16,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-            sh 'apk add --no-cache git docker-cli'
+            sh 'apk add --no-cache git'
             checkout scm
             }
         }
