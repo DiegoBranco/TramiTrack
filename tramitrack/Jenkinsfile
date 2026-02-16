@@ -1,12 +1,9 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:latest'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
+    agent any
+    tools {
+        docker 'docker'
     }
     environment {
-        PATH = "${WORKSPACE}/bin:${env.PATH}"
         FRONTEND_IMAGE = "tramitrack-frontend"
         BACKEND_IMAGE = "tramitrack-backend"
         API_TEST_IMAGE = "api-tests"
@@ -16,7 +13,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-            sh 'apk add --no-cache git'
             checkout scm
             }
         }
@@ -116,9 +112,7 @@ pipeline {
     always {
         script {
             try {
-                node {
-                    sh 'docker system prune -f'
-                }
+                sh 'docker system prune -f'
             } catch (Exception e) {
                 echo "Warning: Failed to run docker prune: ${e.getMessage()}"
             }
