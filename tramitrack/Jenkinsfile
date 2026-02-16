@@ -116,7 +116,9 @@ pipeline {
     always {
         script {
             try {
-                sh 'docker system prune -f'
+                node {
+                    sh 'docker system prune -f'
+                }
             } catch (Exception e) {
                 echo "Warning: Failed to run docker prune: ${e.getMessage()}"
             }
