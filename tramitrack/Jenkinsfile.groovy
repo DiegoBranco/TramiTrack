@@ -21,8 +21,9 @@ pipeline {
             steps {
                 dir('server') {
                     sh '''
+                    ls -la
                     docker build \
-                    -f Dockerfile \
+                    -f dockerfile \
                     -t ${BACKEND_IMAGE}:latest \
                     .
                     '''

@@ -18,7 +18,7 @@ services:
   express-server:
     build:
       context: ./server
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     ports:
       - "3001:3001"
     volumes:
