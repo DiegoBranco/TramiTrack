@@ -14,6 +14,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+            deleteDir()
             checkout scm
             }
         }
@@ -21,7 +22,6 @@ pipeline {
             steps {
                 dir('tramitrack'){
                     sh '''
-                    ls -la
                     docker build \
                     -f server/dockerfile \
                     -t ${BACKEND_IMAGE}:latest \
