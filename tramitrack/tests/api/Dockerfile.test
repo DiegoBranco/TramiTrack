@@ -1,0 +1,10 @@
+FROM postman/newman:alpine
+
+WORKDIR /etc/newman
+
+RUN npm install -g pnpm
+
+# Se usa la bandera --global para que Newman pueda encontrar el plugin
+RUN pnpm add -g newman-reporter-htmlextra
+
+ENTRYPOINT ["newman"]
