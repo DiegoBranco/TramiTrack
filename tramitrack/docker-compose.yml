@@ -40,7 +40,8 @@ services:
       - mongo-data:/data/db
   
   jenkins:
-    image: jenkins/jenkins:lts-jdk17
+    build:
+      context: ./jenkins
     ports:
       - "8080:8080"
       - "50000:50000"
@@ -52,7 +53,6 @@ services:
     volumes:
       - jenkins_data:/var/jenkins_home
       - ./jenkins/jenkins.yaml:/var/jenkins_home/casc_configs/jenkins.yaml
-      - ./jenkins/plugins.txt:/usr/share/jenkins/ref/plugins.txt
 
 volumes:
   mongo-data:
