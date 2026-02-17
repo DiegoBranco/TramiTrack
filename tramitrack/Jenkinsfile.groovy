@@ -19,12 +19,14 @@ pipeline {
         }
         stage('Build Backend') {
             steps {
-                sh '''
-                docker build \
-                -f server/dockerfile \
-                -t ${BACKEND_IMAGE}:latest \
-                server
-                '''
+                dir('server') {
+                    sh '''
+                    docker build \
+                    -f dockerfile \
+                    -t ${BACKEND_IMAGE}:latest \
+                    .
+                    '''
+                }
             }
         }
         stage('Build Frontend') {
