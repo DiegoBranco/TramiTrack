@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Build Backend') {
             steps {
-
+                dir('tramitrack'){
                     sh '''
                     ls -la
                     docker build \
@@ -27,16 +27,19 @@ pipeline {
                     -t ${BACKEND_IMAGE}:latest \
                     .
                     '''
+                }
                 
             }
         }
         stage('Build Frontend') {
             steps {
+                dir('tramitrack'){
                 sh '''
                 docker build \
                 -t ${FRONTEND_IMAGE}:build \
                 .
                 '''
+                }
             }
         }
         /*
