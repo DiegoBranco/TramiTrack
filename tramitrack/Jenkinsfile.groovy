@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout()
+    }
     tools {
         dockerTool 'docker tramitrack'
     }
@@ -14,6 +17,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                // Clean workspace before checkout to avoid permission conflicts
+                deleteDir()
+                // Trust the workspace directory to avoid "dubious ownership" errors
+                sh 'git config --global --add safe.directory "*"'
                 checkout([
                     $class: 'GitSCM',
                     branches: scm.branches,
