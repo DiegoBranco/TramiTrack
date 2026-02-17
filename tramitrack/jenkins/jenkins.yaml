@@ -246,7 +246,7 @@ tool:
       properties:
       - installSource:
           installers:
-          - fromDocker:
+          - docker:
               version: "latest"
   git:
     installations:
@@ -268,7 +268,7 @@ jobs:
                 branch('jenkins')
               }
             }
-            scriptPath('tramitrack\Jenkinsfile.groovy')
+            scriptPath('Jenkinsfile.groovy')
           }
         }
       }
