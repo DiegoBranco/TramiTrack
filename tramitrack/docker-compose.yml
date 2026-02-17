@@ -1,0 +1,43 @@
+services:
+  vue-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build-stage
+    ports:
+      - "3000:3000"  # Maps container port to your Windows port
+    volumes:
+      - .:/app       # This maps your local folder to the container
+      - /app/node_modules # Prevents local node_modules from overwriting container's
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Helps Hot Reload work on Windows/WSL
+    command: pnpm dev --host --port 3000
+    env_file:
+      - .env
+
+  express-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
