@@ -19,15 +19,15 @@ pipeline {
         }
         stage('Build Backend') {
             steps {
-                dir('server') {
+
                     sh '''
                     ls -la
                     docker build \
-                    -f dockerfile \
+                    -f server/dockerfile \
                     -t ${BACKEND_IMAGE}:latest \
                     .
                     '''
-                }
+                
             }
         }
         stage('Build Frontend') {
