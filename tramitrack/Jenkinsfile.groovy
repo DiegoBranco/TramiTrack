@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout()
+    }
     tools {
         dockerTool 'docker tramitrack'
     }
@@ -14,26 +17,40 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-            checkout scm
+                // Clean workspace before checkout to avoid permission conflicts
+                deleteDir()
+                // Trust the workspace directory to avoid "dubious ownership" errors
+                sh 'git config --global --add safe.directory "*"'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    extensions: [[$class: 'WipeWorkspace']],
+                    userRemoteConfigs: scm.userRemoteConfigs
+                ])
             }
         }
         stage('Build Backend') {
             steps {
-                sh '''
-                docker build \
-                -f server/dockerfile \
-                -t ${BACKEND_IMAGE}:latest \
-                server
-                '''
+                dir('tramitrack'){
+                    sh '''
+                    docker build \
+                    -f server/dockerfile \
+                    -t ${BACKEND_IMAGE}:latest \
+                    .
+                    '''
+                }
+                
             }
         }
         stage('Build Frontend') {
             steps {
+                dir('tramitrack'){
                 sh '''
                 docker build \
                 -t ${FRONTEND_IMAGE}:build \
                 .
                 '''
+                }
             }
         }
         /*

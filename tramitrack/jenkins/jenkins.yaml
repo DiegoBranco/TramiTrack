@@ -53,21 +53,8 @@ jenkins:
       allowsSignup: false
       enableCaptcha: false
       users:
-      - id: "admin"
-        name: "admin"
-        properties:
-        - "apiToken"
-        - "consoleUrlProvider"
-        - "viewsTabBar"
-        - myView:
-            viewsTabBar: "standard"
-        - "timezone"
-        - "experimentalFlags"
-        - theme:
-            theme: "dark"
-        - "mailer"
-        - preferredProvider:
-            providerId: "default"
+      - id: ${JENKINS_ADMIN_ID}
+        password: ${JENKINS_ADMIN_PASSWORD}
   slaveAgentPort: 50000
   updateCenter:
     sites:
@@ -246,7 +233,7 @@ tool:
       properties:
       - installSource:
           installers:
-          - fromDocker:
+          - docker:
               version: "latest"
   git:
     installations:
@@ -255,3 +242,20 @@ tool:
   mavenGlobalConfig:
     globalSettingsProvider: "standard"
     settingsProvider: "standard"
+jobs:
+  - script: >
+      pipelineJob('tramitrack-pipeline') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/DiegoBranco/TramiTrack.git')
+                }
+                branch('jenkins')
+              }
+            }
+            scriptPath('tramitrack/Jenkinsfile.groovy')
+          }
+        }
+      }
