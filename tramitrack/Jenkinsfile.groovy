@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout()
+    }
     tools {
         dockerTool 'docker tramitrack'
     }
