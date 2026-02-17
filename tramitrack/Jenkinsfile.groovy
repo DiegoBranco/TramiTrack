@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    options {
-        skipDefaultCheckout()
-    }
     tools {
         dockerTool 'docker tramitrack'
     }
@@ -17,7 +14,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-            deleteDir()
             checkout scm
             }
         }
