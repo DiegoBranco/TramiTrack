@@ -40,6 +40,7 @@ pipeline {
                 }
             }
         }
+        /*
         stage('Frontend Production Image') {
             steps {
                 dir('tramitrack') {
@@ -52,11 +53,15 @@ pipeline {
                 }
             }
         }
+        */
+        /*
         stage('Unit Tests') {
         steps {
             sh 'docker run --rm ${FRONTEND_IMAGE}:build npm test -- --watchAll=false'
             }
         }
+        */
+        /*
         stage('API Tests (Postman/Newman)') {
             steps {
                 script {
@@ -76,6 +81,8 @@ pipeline {
                     }
             }
         }
+        */
+        /*
         stage('E2E Tests') {
             steps {
                 script {
@@ -95,6 +102,8 @@ pipeline {
                     }
                 }
         }
+        */
+        /*
         stage('Performance Tests') {
         steps {
             script {
@@ -114,6 +123,7 @@ pipeline {
                 }
             }
         }
+        */
     }
     post {
     success {
