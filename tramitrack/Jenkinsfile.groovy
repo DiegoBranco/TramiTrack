@@ -22,7 +22,7 @@ pipeline {
                 dir('server') {
                     sh '''
                     docker build \
-                    -f dockerfile \
+                    -f Dockerfile \
                     -t ${BACKEND_IMAGE}:latest \
                     .
                     '''
