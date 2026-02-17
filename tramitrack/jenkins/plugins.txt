@@ -41,6 +41,7 @@ javax-activation-api:1.2.0-8
 jaxb:2.3.9-143.v5979df3304e6
 jjwt-api:0.11.5-120.v0268cf544b_89
 joda-time-api:2.14.0-177.vd7e9347b_e7d5
+job-dsl
 jquery3-api:3.7.1-619.vdb_10e002501a_
 json-api:20251224-185.v0cc18490c62c
 json-path-api:2.10.0-202.va_9cc16c1e476

@@ -51,8 +51,8 @@ services:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     volumes:
       - jenkins_data:/var/jenkins_home
-      - ./jenkins.yaml:/var/jenkins_home/casc_configs/jenkins.yaml
-      - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
+      - ./jenkins/jenkins.yaml:/var/jenkins_home/casc_configs/jenkins.yaml
+      - ./jenkins/plugins.txt:/usr/share/jenkins/ref/plugins.txt
 
 volumes:
   mongo-data:

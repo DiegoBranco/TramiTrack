@@ -268,7 +268,7 @@ jobs:
                 branch('jenkins')
               }
             }
-            scriptPath('tramitrack\Jenkinsfile')
+            scriptPath('Jenkinsfile.groovy')
           }
         }
       }
