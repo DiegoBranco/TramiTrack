@@ -255,3 +255,20 @@ tool:
   mavenGlobalConfig:
     globalSettingsProvider: "standard"
     settingsProvider: "standard"
+jobs:
+  - script: >
+      pipelineJob('tramitrack-pipeline') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/DiegoBranco/TramiTrack.git')
+                }
+                branch('jenkins')
+              }
+            }
+            scriptPath('tramitrack\Jenkinsfile')
+          }
+        }
+      }
