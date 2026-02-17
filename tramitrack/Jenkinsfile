@@ -9,6 +9,7 @@ pipeline {
         API_TEST_IMAGE = "api-tests"
         E2E_IMAGE = "e2e-tests"
         PERF_IMAGE = "perf-tests"
+        DOCKER_API_VERSION = "1.44" 
     }
     stages {
         stage('Checkout') {
