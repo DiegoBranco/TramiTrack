@@ -2,10 +2,14 @@ FROM postman/newman:alpine
 
 WORKDIR /etc/newman
 
-# Instalamos una versión de pnpm compatible con Node 16 (la versión 8)
+# 1. Instalamos pnpm v8
 RUN npm install -g pnpm@8
 
-# Instalamos el reportero
+# 2. Configuramos las carpetas para que pnpm no de error de "Global Bin"
+ENV PNPM_HOME="/root/.local/share/pnpm"
+ENV PATH="${PATH}:${PNPM_HOME}"
+
+# 3. Instalamos el reportero (ahora sí encontrará la ruta)
 RUN pnpm add -g newman-reporter-htmlextra
 
 ENTRYPOINT ["newman"]
