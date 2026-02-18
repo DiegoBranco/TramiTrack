@@ -77,19 +77,15 @@ pipeline {
                 script {
                     dir('tramitrack') {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            sh '''
-                            # 1. Construir la imagen (necesario para tener la colección dentro)
-                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-                            
-                            # 2. Ejecutar Newman forzando la URL manualmente
-                            # Esto ignora lo que diga la colección y usa esta URL directamente
-                            docker run --rm \
-                                --network tramitrack_default \
-                                ${API_TEST_IMAGE} \
-                                run coleccion.postman_collection.json \
-                                --url "http://express-server:3001" \
-                                --reporters cli
-                            '''
+                        sh '''
+                        docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+                        docker run --rm \
+                            --network tramitrack_default \
+                            ${API_TEST_IMAGE} \
+                            run coleccion.postman_collection.json \
+                            -e entorno.postman_environment.json \
+                            --reporters cli
+                        '''
                         }
                     }
                 }
