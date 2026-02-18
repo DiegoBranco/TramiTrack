@@ -72,20 +72,19 @@ pipeline {
             }
         }
         */
-        stage('API Tests (Postman/Newman)') {
+                stage('API Tests (Postman/Newman)') {
             steps {
                 script {
                     dir('tramitrack') {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh '''
-                        docker run --rm \
-                            --network tramitrack_default \
-                            ${API_TEST_IMAGE} \
-                            run coleccion.postman_collection.json \
-                            --global-var "url=http://express-server:3001" \
-                            --verbose \
-                            --reporters cli
-                        '''
+                            sh '''
+                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+                            docker run --rm \
+                                --network tramitrack_default \
+                                ${API_TEST_IMAGE} \
+                                run coleccion.ci.json \
+                                --reporters cli
+                            '''
                         }
                     }
                 }
