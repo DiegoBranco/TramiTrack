@@ -78,19 +78,16 @@ pipeline {
                     // Entramos a la carpeta 'tramitrack' que es donde Jenkins clona el repo
                     dir('tramitrack') {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            sh '''
-                            # 1. Construir la imagen de pruebas usando el Dockerfile.test que subiste
-                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-                            
-                            # 2. Ejecutar Newman
-                            # Usamos la red 'tramitrack_default' para que el contenedor llegue al 'express-server'
-                            docker run --rm \
-                                --network tramitrack_default \
-                                ${API_TEST_IMAGE} \
-                                run coleccion.postman_collection.json \
-                                -e entorno.postman_environment.json \
-                                --reporters cli
-                            '''
+                        sh '''
+                        docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+
+                        docker run --rm \
+                            --network tramitrack_default \
+                            ${API_TEST_IMAGE} \
+                            run coleccion.postman_collection.json \
+                            -e entorno.postman_environment.json \
+                            --reporters cli
+                        '''
                         }
                     }
                 }

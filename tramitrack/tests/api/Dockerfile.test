@@ -12,4 +12,6 @@ ENV PATH="${PATH}:${PNPM_HOME}"
 # 3. Instalamos el reportero (ahora sí encontrará la ruta)
 RUN pnpm add -g newman-reporter-htmlextra
 
+COPY . .
+
 ENTRYPOINT ["newman"]
