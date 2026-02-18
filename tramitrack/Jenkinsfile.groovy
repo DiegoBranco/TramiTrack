@@ -85,7 +85,7 @@ pipeline {
                             --network tramitrack_default \
                             ${API_TEST_IMAGE} \
                             run coleccion.postman_collection.json \
-                            -e entorno.postman_environment.json \
+                            --env-var "url=http://express-server:3001" \
                             --reporters cli
                         '''
                         }
