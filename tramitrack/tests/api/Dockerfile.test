@@ -2,9 +2,10 @@ FROM postman/newman:alpine
 
 WORKDIR /etc/newman
 
-RUN npm install -g pnpm
+# Instalamos una versión de pnpm compatible con Node 16 (la versión 8)
+RUN npm install -g pnpm@8
 
-# Se usa la bandera --global para que Newman pueda encontrar el plugin
+# Instalamos el reportero
 RUN pnpm add -g newman-reporter-htmlextra
 
 ENTRYPOINT ["newman"]
