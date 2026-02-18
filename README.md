@@ -54,3 +54,8 @@ Una vez que los contenedores estén corriendo, podrás acceder a:
 Frontend de Vue en  http://localhost:3000/
 Backend de  Express.js en  http://localhost:3001/
 MongoDB accesible en  http://localhost:27017/
+Jenkins accesible en  http://localhost:8080/
+
+si jenkins no tiene permiso de Docker: 
+docker run --rm -u root -v tramitrack_jenkins_data:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock alpine sh -c "chown -R 1000:1000 /var/jenkins_home && chmod 666 /var/run/docker.sock"
+
