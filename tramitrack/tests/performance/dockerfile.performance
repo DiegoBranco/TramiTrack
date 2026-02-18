@@ -1,0 +1,13 @@
+FROM justb4/jmeter:latest
+
+WORKDIR /tests
+
+# Copiar todo el contenido de performance/
+COPY . .
+
+# Copiar y configurar script de entrada
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# El contenedor ejecutará nuestro script
+ENTRYPOINT ["/entrypoint.sh"]

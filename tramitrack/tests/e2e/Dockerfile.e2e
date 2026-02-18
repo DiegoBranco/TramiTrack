@@ -1,0 +1,14 @@
+FROM cypress/included:latest
+
+WORKDIR /app
+
+# Instalamos pnpm
+RUN npm install -g pnpm
+
+# Copiamos archivos de configuración de tus tests
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install
+
+COPY . .
+
+# El comando por defecto de la imagen ejecutará 'cypress run'

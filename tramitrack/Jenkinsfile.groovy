@@ -109,25 +109,36 @@ pipeline {
                 }
         }
         */
-        /*
+        
         stage('Performance Tests') {
-        steps {
-            script {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh '''
-                        docker build -f tests/performance/dockerfile.performance -t ${PERF_IMAGE} tests/performance
-                        docker run --rm ${PERF_IMAGE}
-                        '''
+            steps {
+                script {
+                    dir('tramitrack') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                            sh '''
+                            docker build -f tests/performance/dockerfile.performance -t ${PERF_IMAGE} tests/performance
+                            
+                            # Crear carpetas para resultados (por si acaso)
+                            mkdir -p tests/performance/results tests/performance/reports
+                            
+                            # Ejecutar con montaje para extraer resultados (opcional)
+                            docker run --rm \
+                                --network tramitrack_default \
+                                -v $(pwd)/tests/performance/results:/tests/results \
+                                -v $(pwd)/tests/performance/reports:/tests/reports \
+                                ${PERF_IMAGE}
+                            '''
+                        }
+                    }
                 }
             }
-        }
             post {
                 unstable {
-                echo 'AVISO: No se ejecutaron pruebas de Performance o los scripts de JMeter faltan'
+                    echo 'AVISO: Las pruebas de rendimiento fallaron o no se ejecutaron completamente'
                 }
             }
         }
-        */
+        
     }
     post {
     success {
