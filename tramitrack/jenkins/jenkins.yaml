@@ -1,11 +1,16 @@
-configuration-as-code: {}
+configuration-as-code: {
+  }
 credentials:
-  folder: {}
-  providerImpl: {}
+  folder: {
+    }
+  providerImpl: {
+    }
   system:
     domainCredentials:
-      - domain: {}
-  user: {}
+    - domain: {
+        }
+  user: {
+    }
 jenkins:
   authorizationStrategy:
     loggedInUsersCanDoAnything:
@@ -15,24 +20,25 @@ jenkins:
       excludeClientIPFromCrumb: false
   disableRememberMe: false
   disabledAdministrativeMonitors:
-    - "jenkins.diagnostics.ControllerExecutorsNoAgents"
-    - "jenkins.security.csp.impl.CspRecommendation"
+  - "jenkins.diagnostics.ControllerExecutorsNoAgents"
+  - "jenkins.security.csp.impl.CspRecommendation"
   labelAtoms:
-    - name: "built-in"
-  log: {}
+  - name: "built-in"
+  log: {
+    }
   markupFormatter: "plainText"
   mode: NORMAL
   nodeMonitors:
-    - "architecture"
-    - "clock"
-    - diskSpace:
-        freeSpaceThreshold: "1GiB"
-        freeSpaceWarningThreshold: "2GiB"
-    - "swapSpace"
-    - tmpSpace:
-        freeSpaceThreshold: "1GiB"
-        freeSpaceWarningThreshold: "2GiB"
-    - "responseTime"
+  - "architecture"
+  - "clock"
+  - diskSpace:
+      freeSpaceThreshold: "1GiB"
+      freeSpaceWarningThreshold: "2GiB"
+  - "swapSpace"
+  - tmpSpace:
+      freeSpaceThreshold: "1GiB"
+      freeSpaceWarningThreshold: "2GiB"
+  - "responseTime"
   numExecutors: 2
   primaryView:
     all:
@@ -47,23 +53,24 @@ jenkins:
       allowsSignup: false
       enableCaptcha: false
       users:
-        - id: ${JENKINS_ADMIN_ID}
-          password: ${JENKINS_ADMIN_PASSWORD}
+      - id: ${JENKINS_ADMIN_ID}
+        password: ${JENKINS_ADMIN_PASSWORD}
   slaveAgentPort: 50000
   updateCenter:
     sites:
-      - id: "default"
-        url: "https://updates.jenkins.io/update-center.json"
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
   views:
-    - all:
-        name: "all"
+  - all:
+      name: "all"
   viewsTabBar: "standard"
 globalCredentialsConfiguration:
   configuration:
     providerFilter: "none"
     typeFilter: "none"
 appearance:
-  consoleUrlProvider: {}
+  consoleUrlProvider: {
+    }
   pipelineGraphView:
     showGraphOnBuildPage: false
     showGraphOnJobPage: false
@@ -79,12 +86,14 @@ security:
     creationOfLegacyTokenEnabled: false
     tokenGenerationOnCreationEnabled: false
     usageStatisticsEnabled: true
-  apiTokenProperty: {}
+  apiTokenProperty: {
+    }
   contentSecurityPolicy:
     enforce: false
   cps:
     hideSandbox: false
-  crumb: {}
+  crumb: {
+    }
   gitHooks:
     allowedOnAgents: false
     allowedOnController: false
@@ -92,23 +101,32 @@ security:
     sshHostKeyVerificationStrategy: "knownHostsFileVerificationStrategy"
   prism:
     protectSourceCodeByPermission: false
-  queueItemAuthenticator: {}
+  queueItemAuthenticator: {
+    }
   scriptApproval:
     forceSandbox: false
-  updateSiteWarningsConfiguration: {}
+  updateSiteWarningsConfiguration: {
+    }
 unclassified:
-  administrativeMonitorsConfiguration: {}
-  artifactManager: {}
+  administrativeMonitorsConfiguration: {
+    }
+  artifactManager: {
+    }
   buildDiscarders:
     configuredBuildDiscarders:
-      - "jobBuildDiscarder"
+    - "jobBuildDiscarder"
   buildStepOperation:
     enabled: false
-  casCGlobalConfig: {}
-  computerRetentionCheckInterval: {}
-  defaultDisplayUrlProvider: {}
-  defaultFolderConfiguration: {}
-  defaultView: {}
+  casCGlobalConfig: {
+    }
+  computerRetentionCheckInterval: {
+    }
+  defaultDisplayUrlProvider: {
+    }
+  defaultFolderConfiguration: {
+    }
+  defaultView: {
+    }
   email-ext:
     adminRequiredForTemplateTesting: false
     allowUnregisteredEnabled: false
@@ -120,8 +138,9 @@ unclassified:
       Check console output at $BUILD_URL to view the results.
     defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
     defaultTriggerIds:
-      - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
-    mailAccount: {}
+    - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+    mailAccount: {
+      }
     maxAttachmentSize: -1
     maxAttachmentSizeMb: -1
     precedenceBulk: false
@@ -132,21 +151,25 @@ unclassified:
     httpClientDelayBetweenRetriesInSeconds: 1
     httpClientMaxRetries: 3
     httpClientTimeoutInSeconds: 1
-  envVarsFilter: {}
+  envVarsFilter: {
+    }
   fingerprints:
     fingerprintCleanupDisabled: false
     storage: "file"
   gitHubConfiguration:
     apiRateLimitChecker: ThrottleForNormalize
   gitHubPluginConfig:
-    hookUrl: "http://localhost:8080/github-webhook/"
-  globalDefaultFlowDurabilityLevel: {}
-  globalLibraries: {}
+    hookUrl: "${JENKINS_HOOK_URL}"
+  globalDefaultFlowDurabilityLevel: {
+    }
+  globalLibraries: {
+    }
   globalTimeOutConfiguration:
     operations:
-      - "abortOperation"
+    - "abortOperation"
     overwriteable: false
-  globalUntrustedLibraries: {}
+  globalUntrustedLibraries: {
+    }
   injectionConfig:
     allowUntrusted: false
     checkForBuildAgentErrors: false
@@ -158,22 +181,31 @@ unclassified:
     storage: "file"
   location:
     adminAddress: "address not configured yet <nobody@nowhere>"
-    url: "http://localhost:8080/"
+    url: "${JENKINS_URL}"
   mailer:
     charset: "UTF-8"
     useSsl: false
     useTls: false
-  metricsAccessKey: {}
-  myView: {}
-  nodeProperties: {}
-  pipeline-model-docker: {}
-  plugin: {}
+  metricsAccessKey: {
+    }
+  myView: {
+    }
+  nodeProperties: {
+    }
+  pipeline-model-docker: {
+    }
+  plugin: {
+    }
   pollSCM:
     pollingThreadCount: 10
-  projectNamingStrategy: {}
-  proxyConfigurationManager: {}
-  quietPeriod: {}
-  resourceRoot: {}
+  projectNamingStrategy: {
+    }
+  proxyConfigurationManager: {
+    }
+  quietPeriod: {
+    }
+  resourceRoot: {
+    }
   scmGit:
     addGitTagAction: false
     allowSecondFetch: false
@@ -182,27 +214,31 @@ unclassified:
     hideCredentials: false
     showEntireCommitSummaryInChanges: false
     useExistingAccountWithSameEmail: false
-  scmRetryCount: {}
-  shell: {}
+  scmRetryCount: {
+    }
+  shell: {
+    }
   timestamper:
     allPipelines: false
     elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
     systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
-  usageStatistics: {}
-  viewsTabBar: {}
+  usageStatistics: {
+    }
+  viewsTabBar: {
+    }
 tool:
   dockerTool:
     installations:
-      - name: "docker tramitrack"
-        properties:
-          - installSource:
-              installers:
-                - docker:
-                    version: "latest"
+    - name: "docker tramitrack"
+      properties:
+      - installSource:
+          installers:
+          - docker:
+              version: "latest"
   git:
     installations:
-      - home: "git"
-        name: "Default"
+    - home: "git"
+      name: "Default"
   mavenGlobalConfig:
     globalSettingsProvider: "standard"
     settingsProvider: "standard"
