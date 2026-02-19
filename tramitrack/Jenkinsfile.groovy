@@ -71,24 +71,25 @@ pipeline {
             sh 'docker run --rm ${FRONTEND_IMAGE}:build pnpm test -- --watchAll=false'
             }
         }
-        stage('API Tests (Postman/Newman)') {
+        */
+                stage('API Tests (Postman/Newman)') {
             steps {
                 script {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh '''
-                        docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-                        docker run --rm ${API_TEST_IMAGE} newman run coleccion.postman_collection.json -e entorno.postman_environment.json
-                        '''
+                    dir('tramitrack') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                            sh '''
+                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+                            docker run --rm \
+                                --network tramitrack_default \
+                                ${API_TEST_IMAGE} \
+                                run coleccion.ci.json \
+                                --reporters cli
+                            '''
+                        }
                     }
                 }
             }
-            post {
-                unstable {
-                    echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
-                    }
-            }
         }
-        */
         stage('E2E Tests') {
             steps {
                 script {
@@ -132,25 +133,36 @@ pipeline {
                     }
                 }
         }
-        /*
+        
         stage('Performance Tests') {
-        steps {
-            script {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh '''
-                        docker build -f tests/performance/dockerfile.performance -t ${PERF_IMAGE} tests/performance
-                        docker run --rm ${PERF_IMAGE}
-                        '''
+            steps {
+                script {
+                    dir('tramitrack') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                            sh '''
+                            docker build -f tests/performance/dockerfile.performance -t ${PERF_IMAGE} tests/performance
+                            
+                            # Crear carpetas para resultados (por si acaso)
+                            mkdir -p tests/performance/results tests/performance/reports
+                            
+                            # Ejecutar con montaje para extraer resultados (opcional)
+                            docker run --rm \
+                                --network tramitrack_default \
+                                -v $(pwd)/tests/performance/results:/tests/results \
+                                -v $(pwd)/tests/performance/reports:/tests/reports \
+                                ${PERF_IMAGE}
+                            '''
+                        }
+                    }
                 }
             }
-        }
             post {
                 unstable {
-                echo 'AVISO: No se ejecutaron pruebas de Performance o los scripts de JMeter faltan'
+                    echo 'AVISO: Las pruebas de rendimiento fallaron o no se ejecutaron completamente'
                 }
             }
         }
-        */
+        
     }
     post {
     success {
