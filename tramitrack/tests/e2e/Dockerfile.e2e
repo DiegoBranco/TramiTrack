@@ -1,14 +1,9 @@
-FROM cypress/included:latest
+FROM cypress/included:12.0.0
 
-WORKDIR /app
+WORKDIR /e2e
 
-# Instalamos pnpm
-RUN npm install -g pnpm
+# Copy Cypress config and specs from project root build context.
+COPY cypress.config.js ./
+COPY tests/e2e ./tests/e2e
 
-# Copiamos archivos de configuración de tus tests
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install
-
-COPY . .
-
-# El comando por defecto de la imagen ejecutará 'cypress run'
+ENTRYPOINT ["cypress", "run"]
