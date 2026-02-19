@@ -72,14 +72,37 @@ pipeline {
             }
         }
         */
-        /*
         stage('E2E Tests') {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         sh '''
-                        docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
-                        docker run --rm ${E2E_IMAGE}
+                        E2E_NET="tramitrack-e2e-net"
+                        APP_CONTAINER="tramitrack-vue-e2e"
+
+                        cleanup() {
+                          docker rm -f ${APP_CONTAINER} >/dev/null 2>&1 || true
+                          docker network rm ${E2E_NET} >/dev/null 2>&1 || true
+                        }
+                        trap cleanup EXIT
+
+                        docker network create ${E2E_NET} || true
+                        docker rm -f ${APP_CONTAINER} || true
+
+                        docker run -d \
+                          --name ${APP_CONTAINER} \
+                          --network ${E2E_NET} \
+                          ${FRONTEND_IMAGE}:build \
+                          pnpm dev --host 0.0.0.0 --port 3000
+
+                        sleep 20
+                        APP_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${APP_CONTAINER})
+
+                        docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} .
+                        docker run --rm \
+                          --network ${E2E_NET} \
+                          -e CYPRESS_baseUrl=http://${APP_IP}:3000 \
+                          ${E2E_IMAGE}
                         '''
                     }
                 }
@@ -90,7 +113,6 @@ pipeline {
                     }
                 }
         }
-        */
         /*
         stage('Performance Tests') {
         steps {
