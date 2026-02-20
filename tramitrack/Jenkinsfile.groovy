@@ -68,6 +68,12 @@ pipeline {
         */
         
         stage('Unit Tests') {
+            agent {
+                dockerfile {
+                    filename 'Dockerfile.unit' 
+                    dir 'tramitrack'
+                }
+            }
             steps {
                 script {
                     dir('tramitrack') {
