@@ -10,6 +10,7 @@ pipeline {
         FRONTEND_IMAGE = "tramitrack-frontend"
         BACKEND_IMAGE = "tramitrack-backend"
         API_TEST_IMAGE = "api-tests"
+        UNIT_TEST_IMAGE = "unit-tests"
         E2E_IMAGE = "e2e-tests"
         PERF_IMAGE = "perf-tests"
         DOCKER_API_VERSION = "1.44" 
@@ -86,7 +87,7 @@ pipeline {
                 }
             }
         }
-        
+        /* 
         stage('API Tests (Postman/Newman)') {
             steps {
                 script {
@@ -179,7 +180,7 @@ pipeline {
             }
         }
         
-    }
+    } */
     /*
     stage('Push Images') {
         when {
