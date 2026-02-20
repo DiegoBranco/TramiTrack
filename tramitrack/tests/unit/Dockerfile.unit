@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
 
 # Instalamos TODAS las dependencias (incluyendo devDependencies donde vive Jest)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install 
 
 COPY . .
 
