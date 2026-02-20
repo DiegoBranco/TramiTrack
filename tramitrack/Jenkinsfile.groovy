@@ -107,7 +107,7 @@ pipeline {
             }
         }
 
-        /*stage('E2E Tests') {
+        stage('E2E Tests') {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
@@ -149,7 +149,7 @@ pipeline {
                     echo 'AVISO: No se ejecutaron pruebas E2E o el contenedor de Cypress fallo'
                     }
                 }
-        }*/
+        }
         
         stage('Performance Tests') {
             steps {

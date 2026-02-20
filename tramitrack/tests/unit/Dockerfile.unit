@@ -1,20 +1,18 @@
 
 FROM node:lts-alpine
 
-WORKDIR /app
-
-# Instalamos pnpm globalmente
+# Instalamos pnpm una sola vez
 RUN npm install -g pnpm@8
+
+WORKDIR /app
 
 # Copiamos los archivos de dependencias
 COPY package.json pnpm-lock.yaml* ./
 
 # Instalamos TODAS las dependencias (incluyendo devDependencies donde vive Jest)
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
-# Copiamos el resto del código
 COPY . .
 
 # Comando para ejecutar jest
-# --passWithNoTests evita que falle si una carpeta está vacía temporalmente
 CMD ["pnpm", "exec", "jest", "--config=jest.config.cjs"]
