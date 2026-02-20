@@ -68,18 +68,12 @@ pipeline {
         */
         
         stage('Unit Tests') {
-            agent {
-                dockerfile {
-                    filename 'Dockerfile.unit' 
-                    dir 'tramitrack/tests/unit'
-                }
-            }
             steps {
                 script {
                     dir('tramitrack') {
+                        sh "docker build -t tramitrack-img -f tests/unit/Dockerfile.unit ."
                         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                            sh 'pnpm install'
-                            sh 'pnpm exec jest --config=jest.config.cjs --reporters=default --reporters=jest-junit'
+                            sh "docker run --rm tramitrack-img pnpm exec jest --config=jest.config.cjs --reporters=default --reporters=jest-junit"
                         }
                     }
                 }
