@@ -70,7 +70,7 @@ pipeline {
             agent {
                 dockerfile {
                     filename 'tests/unit/Dockerfile.unit'
-                    dir 'tramitrack'
+                    dir '.'
                 }
             }
             steps {
