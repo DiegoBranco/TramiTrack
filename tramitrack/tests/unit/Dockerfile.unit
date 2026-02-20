@@ -4,7 +4,7 @@ FROM node:lts-alpine
 WORKDIR /app
 
 # Instalamos pnpm globalmente
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8
 
 # Copiamos los archivos de dependencias
 COPY package.json pnpm-lock.yaml* ./
