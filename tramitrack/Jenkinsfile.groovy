@@ -87,8 +87,8 @@ pipeline {
                 }
             }
         }
-        /* 
-        stage('API Tests (Postman/Newman)') {
+        
+        /*stage('API Tests (Postman/Newman)') {
             steps {
                 script {
                     dir('tramitrack') {
