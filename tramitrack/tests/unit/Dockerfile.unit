@@ -1,0 +1,18 @@
+
+FROM node:lts-alpine
+
+# Instalamos pnpm una sola vez
+RUN npm install -g pnpm@8
+
+WORKDIR /app
+
+# Copiamos los archivos de dependencias
+COPY package.json pnpm-lock.yaml* ./
+
+# Instalamos TODAS las dependencias (incluyendo devDependencies donde vive Jest)
+RUN pnpm install 
+
+COPY . .
+
+# Comando para ejecutar jest
+CMD ["pnpm", "exec", "jest", "--config=jest.config.cjs"]
