@@ -68,17 +68,16 @@ pipeline {
         */
         
         stage('Unit Tests') {
-           agent {
-        dockerfile {
-            filename 'tests/unit/Dockerfile.unit'
-            dir 'tramitrack'
-            // Esto le dice a Jenkins que no borre la imagen inmediatamente
-            reuseNode true 
-        }
-    }
-    steps {
-        sh 'pnpm exec jest --config=jest.config.cjs'
-    }
+            steps {
+                script {
+                    dir('tramitrack') {
+                        sh "docker build -t tramitrack-img -f tests/unit/Dockerfile.unit ."
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            sh "docker run --rm tramitrack-img pnpm exec jest --config=jest.config.cjs --reporters=default --reporters=jest-junit"
+                        }
+                    }
+                }
+            }
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'tramitrack/junit.xml'
