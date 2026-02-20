@@ -65,14 +65,30 @@ pipeline {
             }
         }
         */
-        /*
+        
         stage('Unit Tests') {
-        steps {
-            sh 'docker run --rm ${FRONTEND_IMAGE}:build pnpm test -- --watchAll=false'
+            agent {
+                dockerfile {
+                    filename 'tests/unit/Dockerfile.unit'
+                    dir 'tramitrack'
+                }
+            }
+            steps {
+                dir('tramitrack') {
+                    sh 'pnpm exec jest --config=jest.config.cjs --reporters=default --reporters=jest-junit'
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'tramitrack/junit.xml'
+                }
+                failure {
+                    echo 'Unit tests failed. Review the JUnit report above.'
+                }
             }
         }
-        */
-                stage('API Tests (Postman/Newman)') {
+        
+        stage('API Tests (Postman/Newman)') {
             steps {
                 script {
                     dir('tramitrack') {
@@ -90,6 +106,7 @@ pipeline {
                 }
             }
         }
+
         stage('E2E Tests') {
             steps {
                 script {
@@ -100,8 +117,8 @@ pipeline {
                             APP_CONTAINER="tramitrack-vue-e2e"
 
                             cleanup() {
-                              docker rm -f ${APP_CONTAINER} >/dev/null 2>&1 || true
-                              docker network rm ${E2E_NET} >/dev/null 2>&1 || true
+                                docker rm -f ${APP_CONTAINER} >/dev/null 2>&1 || true
+                                docker network rm ${E2E_NET} >/dev/null 2>&1 || true
                             }
                             trap cleanup EXIT
 
@@ -109,19 +126,19 @@ pipeline {
                             docker rm -f ${APP_CONTAINER} || true
 
                             docker run -d \
-                              --name ${APP_CONTAINER} \
-                              --network ${E2E_NET} \
-                              ${FRONTEND_IMAGE}:build \
-                              pnpm dev --host 0.0.0.0 --port 3000
+                                --name ${APP_CONTAINER} \
+                                --network ${E2E_NET} \
+                                ${FRONTEND_IMAGE}:build \
+                                pnpm dev --host 0.0.0.0 --port 3000
 
                             sleep 20
                             APP_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${APP_CONTAINER})
 
                             docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} .
                             docker run --rm \
-                              --network ${E2E_NET} \
-                              -e CYPRESS_baseUrl=http://${APP_IP}:3000 \
-                              ${E2E_IMAGE}
+                                --network ${E2E_NET} \
+                                -e CYPRESS_baseUrl=http://${APP_IP}:3000 \
+                                ${E2E_IMAGE}
                             '''
                         }
                     }
@@ -164,6 +181,30 @@ pipeline {
         }
         
     }
+    /*
+    stage('Push Images') {
+        when {
+            branch 'main'
+        }
+        steps {
+            withCredentials([usernamePassword(
+                credentialsId: 'github-creds',
+                usernameVariable: 'GITHUB_USER',
+                passwordVariable: 'GITHUB_TOKEN'
+            )]) {
+                sh '''
+                echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_USER" --password-stdin
+
+                docker tag ${FRONTEND_IMAGE}:build ghcr.io/${GITHUB_USER}/tramitrack-frontend:${BUILD_NUMBER}
+                docker tag ${BACKEND_IMAGE}:latest ghcr.io/${GITHUB_USER}/tramitrack-backend:${BUILD_NUMBER}
+
+                docker push ghcr.io/${GITHUB_USER}/tramitrack-frontend:${BUILD_NUMBER}
+                docker push ghcr.io/${GITHUB_USER}/tramitrack-backend:${BUILD_NUMBER}
+                '''
+            }
+        }
+    }
+    */
     post {
     success {
         echo 'Pipeline finalizado: Proceso completado exitosamente'
