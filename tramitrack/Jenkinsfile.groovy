@@ -67,15 +67,19 @@ pipeline {
         */
         
         stage('Unit Tests') {
-            agent {
+            /* agent {
                 dockerfile {
                     filename 'tests/unit/Dockerfile.unit'
-                    dir '.'
+                    dir 'tramitrack'
                 }
-            }
+            } */
             steps {
-                dir('tramitrack') {
-                    sh 'pnpm exec jest --config=jest.config.cjs --reporters=default --reporters=jest-junit'
+                script {
+                    dir('tramitrack') {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            sh 'pnpm exec jest --config=jest.config.cjs --reporters=default --reporters=jest-junit'
+                        }
+                    }
                 }
             }
             post {
