@@ -39,7 +39,8 @@ const upload = multer({ storage: storage });
 const PaymentStub = mongoose.model('PaymentStub', new mongoose.Schema({
   originalName: String,
   filename: String,
-  path: String,
+  ruta_comprobante: String,
+  solicitud_id: String,
   uploadDate: { type: Date, default: Date.now }
 }));
 
@@ -56,8 +57,10 @@ app.post('/upload-stub', upload.single('paymentStub'), async (req, res) => {
     const newStub = new PaymentStub({
       originalName: req.file.originalname,
       filename: req.file.filename,
-      path: req.file.path
+      ruta_comprobante: req.file.path,
+      solicitud_id: req.body.solicitud_id
     });
+    
     await newStub.save();
     res.status(201).json({ message: 'Payment stub uploaded successfully', data: newStub });
   } catch (error) {
