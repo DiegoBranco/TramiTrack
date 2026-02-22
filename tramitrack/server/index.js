@@ -69,6 +69,28 @@ app.post('/upload-stub', upload.single('paymentStub'), async (req, res) => {
   }
 });
 
+app.get('/solicitudStubs/:solicitud_id', async (req, res) => {
+  try {
+    const documents = await PaymentStub.find({ solicitud_id: req.params.solicitud_id });
+    res.json(documents);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching documents', error });
+  }
+});
+
+app.get('/stubFile/:id', async (req, res) => {
+  try {
+    const document = await PaymentStub.findById(req.params.id);
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+    const filePath = path.join(__dirname, 'uploads', document.filename);
+    res.download(filePath, document.originalName);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching document', error });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
