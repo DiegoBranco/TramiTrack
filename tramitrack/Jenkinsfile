@@ -35,7 +35,7 @@ pipeline {
                 dir('tramitrack'){
                     sh '''
                     docker build \
-                    -f server/dockerfile \
+                    -f server/Dockerfile \
                     -t ${BACKEND_IMAGE}:latest \
                     .
                     '''
