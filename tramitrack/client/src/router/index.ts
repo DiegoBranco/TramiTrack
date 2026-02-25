@@ -8,6 +8,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { setupLayouts } from "virtual:generated-layouts";
 import { routes } from "vue-router/auto-routes";
+import { useAuthStore } from "../stores/auth";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,24 +18,50 @@ const router = createRouter({
 // --- CONFIGURACIÓN DE REDIRECCIÓN Y RUTAS ---
 
 router.beforeEach((to, from, next) => {
-  // obtener todos los nombres de rutas registradas
+  const auth = useAuthStore();
+
   const routeExists = router
     .getRoutes()
     .some((route) => route.path === to.path);
 
-  if (to.path === "/") {
-    next("/login");
-  } else if (!routeExists) {
-    next("/login");
+  // si la ruta no existe o es la raíz, redirigir según estado de auth
+  if (!routeExists || to.path === "/") {
+    if (!auth.isAuthenticated) {
+      return next("/login");
+    } else {
+      // Si está autenticado pero la ruta no existe, mandarlo a su home correspondiente
+      return next(auth.user?.rol === "administrador" ? "/admin-home" : "/home");
+    }
   }
-  // 4. Lógica de protección futura (ej. si no está logueado y no es la página login)
-  // else if (to.path !== '/login' && !isLoggedIn) { next('/login') }
-  else {
-    next();
+
+  // si nO está autenticado y la ruta no es /login, mandarlo a /login
+  if (to.path !== "/login" && !auth.isAuthenticated) {
+    return next("/login");
   }
+
+  // si ya está autenticado e intenta entrar a /login, redirigir según su rol
+  if (to.path === "/login" && auth.isAuthenticated) {
+    if (auth.user?.rol === "administrador") {
+      return next("/admin-home");
+    } else {
+      return next("/home");
+    }
+  }
+
+  // Si la ruta contiene "admin" y el usuario no tiene ese rol, mandarlo al home normal
+  if (
+    to.path.includes("admin") &&
+    auth.isAuthenticated &&
+    auth.user?.rol !== "admin"
+  ) {
+    return next("/home");
+  }
+
+  next();
 });
 
-// Workaround for https://github.com/vitejs/vite/issues/11804
+// --- MANEJO DE ERRORES DE IMPORTACIÓN DINÁMICA ---
+
 router.onError((err, to) => {
   if (err?.message?.includes?.("Failed to fetch dynamically imported module")) {
     if (localStorage.getItem("vuetify:dynamic-reload")) {
