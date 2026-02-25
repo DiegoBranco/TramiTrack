@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout()
+    }
     tools {
         dockerTool 'docker tramitrack'
     }
@@ -14,26 +17,42 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-            checkout scm
+                // Clean workspace before checkout to avoid permission conflicts
+                deleteDir()
+                // Trust the workspace directory to avoid "dubious ownership" errors
+                sh 'git config --global --add safe.directory "*"'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    extensions: [[$class: 'WipeWorkspace']],
+                    userRemoteConfigs: scm.userRemoteConfigs
+                ])
             }
         }
         stage('Build Backend') {
             steps {
-                sh '''
-                docker build \
-                -f server/dockerfile \
-                -t ${BACKEND_IMAGE}:latest \
-                server
-                '''
+                // Build backend from the `server` folder (Dockerfile uses default name)
+                dir('tramitrack'){
+                    sh '''
+                    docker build \
+                    -f server/Dockerfile \
+                    -t ${BACKEND_IMAGE}:latest \
+                    .
+                    '''
+                }
+
             }
         }
         stage('Build Frontend') {
             steps {
+                // Build frontend from the `client` folder (uses client/Dockerfile)
+                dir('tramitrack'){
                 sh '''
                 docker build \
                 -t ${FRONTEND_IMAGE}:build \
                 .
                 '''
+                }
             }
         }
         /*
@@ -48,7 +67,8 @@ pipeline {
             }
         }
         */
-        /*
+        
+        
         stage('Unit Tests') {
         steps {
             sh 'docker run --rm ${FRONTEND_IMAGE}:build pnpm test -- --watchAll=false'
@@ -71,8 +91,10 @@ pipeline {
                     }
             }
         }
-        */
-        /*
+        
+        
+        
+        
         stage('E2E Tests') {
             steps {
                 script {
@@ -90,8 +112,8 @@ pipeline {
                     }
                 }
         }
-        */
-        /*
+        
+        
         stage('Performance Tests') {
         steps {
             script {
@@ -121,7 +143,8 @@ pipeline {
     always {
         script {
             try {
-                sh 'docker system prune -f'
+                sh 'docker image prune -f --filter "dangling=true"'
+                sh 'docker image prune -f --filter "dangling=true"'
             } catch (Exception e) {
                 echo "Warning: Failed to run docker prune: ${e.getMessage()}"
             }

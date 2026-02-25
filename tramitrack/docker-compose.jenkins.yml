@@ -1,0 +1,20 @@
+services:
+  jenkins:
+    build:
+      context: ./ic/jenkins
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    env_file:
+      - .env
+    environment:
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs/jenkins.yaml
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - ./ic/jenkins/jenkins.yaml:/var/jenkins_home/casc_configs/jenkins.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  jenkins_data:
