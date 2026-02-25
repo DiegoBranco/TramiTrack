@@ -1,13 +1,13 @@
 services:
   vue-app:
     build:
-      context: .
+      context: ./client
       dockerfile: Dockerfile
       target: build-stage
     ports:
       - "3000:3000"  # Maps container port to your Windows port
     volumes:
-      - .:/app       # This maps your local folder to the container
+      - ./client:/app       # This maps your local folder to the container
       - /app/node_modules # Prevents local node_modules from overwriting container's
     environment:
       - CHOKIDAR_USEPOLLING=true # Helps Hot Reload work on Windows/WSL
@@ -18,7 +18,7 @@ services:
   express-server:
     build:
       context: ./server
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "3001:3001"
     volumes:
@@ -39,23 +39,5 @@ services:
     volumes:
       - mongo-data:/data/db
   
-  jenkins:
-    build:
-      context: ./jenkins
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    env_file:
-      - .env
-    environment:
-      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs/jenkins.yaml
-      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
-    volumes:
-      - jenkins_data:/var/jenkins_home
-      - ./jenkins/jenkins.yaml:/var/jenkins_home/casc_configs/jenkins.yaml
-      - /var/run/docker.sock:/var/run/docker.sock
-
 volumes:
   mongo-data:
-  jenkins_data:
