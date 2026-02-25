@@ -75,6 +75,9 @@
             >
               Iniciar Sesión
             </v-btn>
+            <p v-if="loginError" class="text-error text-caption mt-2">
+              {{ loginError }}
+            </p>
           </v-form>
 
           <div class="mt-8 text-center">
@@ -101,16 +104,28 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth";
+import axios from "axios";
+
 const router = useRouter();
+const auth = useAuthStore();
 
 // Estados del formulario
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
+const rememberMe = ref(false);
+const loginError = ref<string | null>(null);
 
-const handleLogin = () => {
-  // validar credenciales
-  router.push("/admin-home");
+const handleLogin = async () => {
+  loginError.value = null;
+  try {
+    await auth.login(email.value, password.value);
+    router.push("/admin-home");
+  } catch (err: any) {
+    // muestra mensaje de error simplificado
+    loginError.value = err.response?.data?.message || "Error en el login";
+  }
 };
 </script>
 

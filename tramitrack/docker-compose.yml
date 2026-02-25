@@ -5,9 +5,9 @@ services:
       dockerfile: Dockerfile
       target: build-stage
     ports:
-      - "3000:3000"  # Maps container port to your Windows port
+      - "3000:3000" # Maps container port to your Windows port
     volumes:
-      - ./client:/app       # This maps your local folder to the container
+      - ./client:/app # This maps your local folder to the container
       - /app/node_modules # Prevents local node_modules from overwriting container's
     environment:
       - CHOKIDAR_USEPOLLING=true # Helps Hot Reload work on Windows/WSL
@@ -30,7 +30,7 @@ services:
       - mongo
 
   mongo:
-    image: mongo:latest
+    image: mongo:4.4
     ports:
       - "27017:27017"
     environment:
@@ -38,6 +38,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - mongo-data:/data/db
-  
+
 volumes:
   mongo-data:
