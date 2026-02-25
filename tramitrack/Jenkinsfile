@@ -33,12 +33,19 @@ pipeline {
             steps {
                 // Build backend from the `server` folder (Dockerfile uses default name)
                 dir('tramitrack'){
-                    sh '''
-                    docker build \
-                    -f server/Dockerfile \
-                    -t ${BACKEND_IMAGE}:latest \
-                    .
-                    '''
+                                        sh '''
+                                        if [ ! -f server/Dockerfile ]; then
+                                            echo "ERROR: server/Dockerfile not found in $(pwd)/server"
+                                            ls -la server || true
+                                            exit 1
+                                        fi
+
+                                        echo "Building backend image using 'server' as context..."
+                                        docker build \
+                                            -f server/Dockerfile \
+                                            -t ${BACKEND_IMAGE}:latest \
+                                            server
+                                        '''
                 }
                 
             }
@@ -47,11 +54,19 @@ pipeline {
             steps {
                 // Build frontend from the `client` folder (uses client/Dockerfile)
                 dir('tramitrack'){
-                sh '''
-                docker build \
-                -t ${FRONTEND_IMAGE}:build \
-                .
-                '''
+                                sh '''
+                                if [ ! -f client/Dockerfile ]; then
+                                    echo "ERROR: client/Dockerfile not found in $(pwd)/client"
+                                    ls -la client || true
+                                    exit 1
+                                fi
+
+                                echo "Building frontend image using 'client' as context..."
+                                docker build \
+                                    -f client/Dockerfile \
+                                    -t ${FRONTEND_IMAGE}:build \
+                                    client
+                                '''
                 }
             }
         }
