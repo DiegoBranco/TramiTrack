@@ -34,12 +34,22 @@
         ></v-badge>
       </v-btn>
 
-      <v-btn icon variant="text" color="primary" @click="toggleProfile">
+      <v-btn icon variant="text" color="primary" @click="router.push('/admin-profile')">
         <v-icon size="36">mdi-account-circle-outline</v-icon>
       </v-btn>
     </div>
   </v-app-bar>
 </template>
+
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const toggleNotifications = () => {
+  // TODO: implementar panel de notificaciones
+};
+</script>
 
 <style scoped>
 .logo-text {
