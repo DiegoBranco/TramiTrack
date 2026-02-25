@@ -19,6 +19,14 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
+    '/admin-home': RouteRecordInfo<'/admin-home', '/admin-home', Record<never, never>, Record<never, never>>,
+    '/admin-info-tramite': RouteRecordInfo<'/admin-info-tramite', '/admin-info-tramite', Record<never, never>, Record<never, never>>,
+    '/admin-tipo-tramite': RouteRecordInfo<'/admin-tipo-tramite', '/admin-tipo-tramite', Record<never, never>, Record<never, never>>,
+    '/home': RouteRecordInfo<'/home', '/home', Record<never, never>, Record<never, never>>,
+    '/info-tramite': RouteRecordInfo<'/info-tramite', '/info-tramite', Record<never, never>, Record<never, never>>,
+    '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
+    '/solicitar-constancia': RouteRecordInfo<'/solicitar-constancia', '/solicitar-constancia', Record<never, never>, Record<never, never>>,
+    '/tipo-tramite': RouteRecordInfo<'/tipo-tramite', '/tipo-tramite', Record<never, never>, Record<never, never>>,
   }
 
   /**
@@ -34,6 +42,38 @@ declare module 'vue-router/auto-routes' {
   export interface _RouteFileInfoMap {
     'src/pages/index.vue': {
       routes: '/'
+      views: never
+    }
+    'src/pages/admin-home.vue': {
+      routes: '/admin-home'
+      views: never
+    }
+    'src/pages/admin-info-tramite.vue': {
+      routes: '/admin-info-tramite'
+      views: never
+    }
+    'src/pages/admin-tipo-tramite.vue': {
+      routes: '/admin-tipo-tramite'
+      views: never
+    }
+    'src/pages/home.vue': {
+      routes: '/home'
+      views: never
+    }
+    'src/pages/info-tramite.vue': {
+      routes: '/info-tramite'
+      views: never
+    }
+    'src/pages/login.vue': {
+      routes: '/login'
+      views: never
+    }
+    'src/pages/solicitar-constancia.vue': {
+      routes: '/solicitar-constancia'
+      views: never
+    }
+    'src/pages/tipo-tramite.vue': {
+      routes: '/tipo-tramite'
       views: never
     }
   }
