@@ -27,7 +27,7 @@
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
-            class="text-none rounded-pill px-6"
+            class="text-none "
           >
             Agregar Trámite
           </v-btn>
@@ -50,7 +50,7 @@
           </p>
           <v-btn
             color="secondary"
-            class="text-none rounded-pill px-6 text-white"
+            class="text-none text-white"
           >
             Ir a Estadísticas
           </v-btn>
