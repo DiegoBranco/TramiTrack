@@ -32,8 +32,13 @@ pipeline {
         stage('Build Backend') {
             steps {
                 // Build backend from the `server` folder (Dockerfile uses default name)
-                dir('tramitrack/server') {
-                    sh 'docker build -t ${BACKEND_IMAGE}:latest .'
+                dir('tramitrack'){
+                    sh '''
+                    docker build \
+                    -f server/dockerfile \
+                    -t ${BACKEND_IMAGE}:latest \
+                    .
+                    '''
                 }
                 
             }
@@ -41,8 +46,12 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 // Build frontend from the `client` folder (uses client/Dockerfile)
-                dir('tramitrack/client') {
-                    sh 'docker build -t ${FRONTEND_IMAGE}:build .'
+                dir('tramitrack'){
+                sh '''
+                docker build \
+                -t ${FRONTEND_IMAGE}:build \
+                .
+                '''
                 }
             }
         }
