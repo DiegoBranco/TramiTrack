@@ -1,7 +1,7 @@
 services:
   jenkins:
     build:
-      context: ./ci/jenkins
+      context: ./ic/jenkins
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -13,7 +13,7 @@ services:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     volumes:
       - jenkins_data:/var/jenkins_home
-      - ./ci/jenkins/jenkins.yaml:/var/jenkins_home/casc_configs/jenkins.yaml
+      - ./ic/jenkins/jenkins.yaml:/var/jenkins_home/casc_configs/jenkins.yaml
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
