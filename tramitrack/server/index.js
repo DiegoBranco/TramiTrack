@@ -1,96 +1,19 @@
 const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const cors = require('cors');
+const connectDB = require('./config/db');
+const paymentStubRoutes = require('./routes/paymentStub.routes');
+
 const app = express();
 const port = process.env.SERVER_PORT || 3001;
-const mongoUri = process.env.MONGO_URI 
 
-console.log(`Attempting to connect to MongoDB at: ${mongoUri}`);
-
-mongoose.connect(mongoUri)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Could not connect to MongoDB', err));
+connectDB();
 
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/', paymentStubRoutes);
 
-// Configure Multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    // Create a unique filename with the original extension
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+app.get('/', (req, res) => res.json({ message: 'Hello from Express Server!' }));
 
-const upload = multer({ storage: storage });
-
-// Mongoose Model for Payment Stub
-const PaymentStub = mongoose.model('PaymentStub', new mongoose.Schema({
-  originalName: String,
-  filename: String,
-  ruta_comprobante: String,
-  solicitud_id: String,
-  uploadDate: { type: Date, default: Date.now }
-}));
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello from Express Server!' });
-});
-
-app.post('/upload-stub', upload.single('paymentStub'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' });
-  }
-
-  try {
-    const newStub = new PaymentStub({
-      originalName: req.file.originalname,
-      filename: req.file.filename,
-      ruta_comprobante: req.file.path,
-      solicitud_id: req.body.solicitud_id
-    });
-    
-    await newStub.save();
-    res.status(201).json({ message: 'Payment stub uploaded successfully', data: newStub });
-  } catch (error) {
-    console.error('Error saving payment stub:', error);
-    res.status(500).json({ message: 'Error uploading file', error });
-  }
-});
-
-app.get('/solicitudStubs/:solicitud_id', async (req, res) => {
-  try {
-    const documents = await PaymentStub.find({ solicitud_id: req.params.solicitud_id });
-    res.json(documents);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching documents', error });
-  }
-});
-
-app.get('/stubFile/:id', async (req, res) => {
-  try {
-    const document = await PaymentStub.findById(req.params.id);
-    if (!document) {
-      return res.status(404).json({ message: 'Document not found' });
-    }
-    const filePath = path.join(__dirname, 'uploads', document.filename);
-    res.download(filePath, document.originalName);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching document', error });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+app.listen(port, () => console.log(`Server running at http://localhost:${port}`));
