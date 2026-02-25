@@ -35,12 +35,12 @@ pipeline {
                 dir('tramitrack'){
                     sh '''
                     docker build \
-                    -f server/dockerfile \
+                    -f server/Dockerfile \
                     -t ${BACKEND_IMAGE}:latest \
                     .
                     '''
                 }
-                
+
             }
         }
         stage('Build Frontend') {
@@ -67,7 +67,7 @@ pipeline {
             }
         }
         */
-        /*
+        
         stage('Unit Tests') {
         steps {
             sh 'docker run --rm ${FRONTEND_IMAGE}:build pnpm test -- --watchAll=false'
@@ -90,8 +90,8 @@ pipeline {
                     }
             }
         }
-        */
-        /*
+        
+        
         stage('E2E Tests') {
             steps {
                 script {
@@ -109,8 +109,7 @@ pipeline {
                     }
                 }
         }
-        */
-        /*
+        
         stage('Performance Tests') {
         steps {
             script {
@@ -140,7 +139,7 @@ pipeline {
     always {
         script {
             try {
-                sh 'docker system prune -f'
+                sh 'docker image prune -f --filter "dangling=true"'
             } catch (Exception e) {
                 echo "Warning: Failed to run docker prune: ${e.getMessage()}"
             }
