@@ -45,6 +45,11 @@ pipeline {
                                             -f server/Dockerfile \
                                             -t ${BACKEND_IMAGE}:latest \
                                             server
+
+                                        echo "Listing backend image(s):"
+                                        docker images --format "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}}" | grep ${BACKEND_IMAGE} || true
+                                        echo "Quick run-check: 'node -v' inside backend image (may fail if image doesn't include node runtime)"
+                                        docker run --rm ${BACKEND_IMAGE}:latest node -v || echo "Backend image run-check failed (this may be normal)"
                                         '''
                 }
                 
@@ -66,6 +71,9 @@ pipeline {
                                     -f client/Dockerfile \
                                     -t ${FRONTEND_IMAGE}:build \
                                     client
+
+                                echo "Listing frontend image(s):"
+                                docker images --format "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}}" | grep ${FRONTEND_IMAGE} || true
                                 '''
                 }
             }
@@ -82,7 +90,7 @@ pipeline {
             }
         }
         */
-        /*
+        
         stage('Unit Tests') {
         steps {
             sh 'docker run --rm ${FRONTEND_IMAGE}:build pnpm test -- --watchAll=false'
@@ -105,8 +113,8 @@ pipeline {
                     }
             }
         }
-        */
-        /*
+        
+        
         stage('E2E Tests') {
             steps {
                 script {
@@ -124,8 +132,7 @@ pipeline {
                     }
                 }
         }
-        */
-        /*
+        
         stage('Performance Tests') {
         steps {
             script {
@@ -155,7 +162,7 @@ pipeline {
     always {
         script {
             try {
-                sh 'docker system prune -f'
+                sh 'docker image prune -f --filter "dangling=true"'
             } catch (Exception e) {
                 echo "Warning: Failed to run docker prune: ${e.getMessage()}"
             }
