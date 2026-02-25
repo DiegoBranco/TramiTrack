@@ -50,7 +50,7 @@
           </p>
           <v-btn
             color="secondary"
-            class="text-none text-white"
+            class="text-none text-white btn-secondary"
           >
             Ir a Estadísticas
           </v-btn>
@@ -190,9 +190,15 @@ const getInitials = (name: string) => {
 .max-width-300 {
   max-width: 300px;
 }
-
-/* Ajuste para que el fondo de la tabla se vea limpio como en el wireframe */
 :deep(.v-data-table-header) {
   background-color: #f9f9f9;
+}
+
+:deep(.v-chip .v-chip__content) {
+  color: white !important;
+}
+
+:deep(.btn-secondary .v-btn__content) {
+  color: white !important;
 }
 </style>
