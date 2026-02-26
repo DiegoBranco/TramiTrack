@@ -19,44 +19,147 @@ export interface SolicitudPayload {
   datos_formulario: DatosFormulario;
 }
 
+export interface TramiteResponse {
+  _id: string;
+  numero_seguimiento: string;
+  estado: "pendiente" | "en_proceso" | "completado" | "rechazado";
+  fecha_solicitud: string;
+  fecha_estimada?: string;
+  createdAt: string;
+  updatedAt: string;
+  tramiteType_id: {
+    _id: string;
+    nombre: string;
+    costo: number;
+    dias_habiles: number;
+  };
+  estudiante_id: {
+    _id: string;
+    nombre: string;
+    apellido: string;
+  };
+  datos_formulario: DatosFormulario;
+  observaciones?: string;
+  comprobante_id?: any;
+  documento_final?: string;
+}
+
 class SolicitudService {
   private baseUrl = `${API_URL}/api/solicitudes`;
 
+  /**
+   * Crear una nueva solicitud con opción de adjuntar comprobante
+   */
   async create(payload: SolicitudPayload, comprobante?: File) {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    // append the plain fields
-    formData.append("tramiteType_id", payload.tramiteType_id);
-    formData.append("estudiante_id", payload.estudiante_id);
-    // datos_formulario as JSON string to preserve nesting
-    formData.append(
-      "datos_formulario",
-      JSON.stringify(payload.datos_formulario),
-    );
+      formData.append("tramiteType_id", payload.tramiteType_id);
+      formData.append("estudiante_id", payload.estudiante_id);
+      formData.append(
+        "datos_formulario",
+        JSON.stringify(payload.datos_formulario),
+      );
 
-    if (comprobante) {
-      formData.append("comprobante", comprobante);
+      if (comprobante) {
+        formData.append("comprobante", comprobante);
+      }
+
+      const response = await axios.post(this.baseUrl, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error en solicitudService.create:", error);
+      throw error;
     }
+  }
 
-    const response = await axios.post(this.baseUrl, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+  /**
+   * Obtener todas las solicitudes del estudiante actual
+   */
+  async getMy(estudiante_id: string): Promise<TramiteResponse[]> {
+    try {
+      const response = await axios.get(`${this.baseUrl}/mis`, {
+        params: { estudiante_id },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error en solicitudService.getMy:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener una solicitud por ID
+   */
+  async getById(id: string): Promise<TramiteResponse> {
+    try {
+      const response = await axios.get(`${this.baseUrl}/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error en solicitudService.getById:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Formatear estado para mostrar en UI
+   */
+  formatEstado(estado: string): string {
+    const estados: Record<string, string> = {
+      pendiente: "Pendiente",
+      en_proceso: "En Proceso",
+      completado: "Completado",
+      rechazado: "Rechazado",
+    };
+    return estados[estado] || estado;
+  }
+
+  /**
+   * Obtener color según el estado
+   */
+  getStatusColor(estado: string): string {
+    switch (estado) {
+      case "completado":
+        return "success";
+      case "en_proceso":
+        return "accent";
+      case "pendiente":
+        return "secondary";
+      case "rechazado":
+        return "error";
+      default:
+        return "grey";
+    }
+  }
+
+  /**
+   * Formatear fecha para mostrar
+   */
+  formatDate(dateString: string): string {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
-    return response.data;
   }
 
-  async getMy(estudiante_id: string) {
-    const response = await axios.get(`${this.baseUrl}/mis`, {
-      params: { estudiante_id },
-    });
-    return response.data;
+  /**
+   * Transformar datos del backend para la tabla
+   */
+  transformToTableFormat(solicitudes: TramiteResponse[]): any[] {
+    return solicitudes.map((solicitud) => ({
+      _id: solicitud._id,
+      numero_seguimiento: solicitud.numero_seguimiento || "N/A",
+      tipo: solicitud.tramiteType_id?.nombre || "Trámite sin especificar",
+      fecha_solicitud: solicitud.fecha_solicitud || solicitud.createdAt,
+      estado: solicitud.estado,
+      original: solicitud,
+    }));
   }
-
-  async getById(id: string) {
-    const response = await axios.get(`${this.baseUrl}/${id}`);
-    return response.data;
-  }
-
-  // other methods can be added here as needed
 }
 
 export default new SolicitudService();
