@@ -30,6 +30,7 @@ export interface TramiteResponse {
   tramiteType_id: {
     _id: string;
     nombre: string;
+    descripcion: string;
     costo: number;
     dias_habiles: number;
   };
