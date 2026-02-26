@@ -30,7 +30,7 @@ router.beforeEach((to, from, next) => {
       return next("/login");
     } else {
       // Si está autenticado pero la ruta no existe, mandarlo a su home correspondiente
-      return next(auth.user?.rol === "administrador" ? "/admin-home" : "/home");
+      return next(auth.user?.rol === "admin" ? "/admin-home" : "/home");
     }
   }
 
@@ -41,7 +41,7 @@ router.beforeEach((to, from, next) => {
 
   // si ya está autenticado e intenta entrar a /login, redirigir según su rol
   if (to.path === "/login" && auth.isAuthenticated) {
-    if (auth.user?.rol === "administrador") {
+    if (auth.user?.rol === "admin") {
       return next("/admin-home");
     } else {
       return next("/home");
