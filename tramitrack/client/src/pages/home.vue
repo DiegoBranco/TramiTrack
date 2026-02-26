@@ -1,6 +1,6 @@
 <template>
-  <v-container class="pa-6 pa-sm-10 bg-grey-lighten-4" fluid>
-    <AppBreadcrumbs class="mb-4" />
+  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+    <AppBreadcrumbs class="mb-2" />
     <v-row>
       <v-col cols="12">
         <h1 class="font-bitter text-h3 text-primary font-weight-bold mb-6">
@@ -157,7 +157,6 @@ import solicitudService, {
   type TramiteResponse,
 } from "@/services/solicitudService";
 import { v } from "vue-router/dist/router-CWoNjPRp.mjs";
-import solicitudService from "@/services/solicitudService";
 
 const router = useRouter();
 const authStore = useAuthStore();

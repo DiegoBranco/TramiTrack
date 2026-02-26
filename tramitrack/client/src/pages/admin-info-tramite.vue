@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-6 pa-sm-10 bg-grey-lighten-4" fluid>
-    <AppBreadcrumbs class="mb-4" />
+  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+    <AppBreadcrumbs class="mb-2" />
   </v-container>
 </template>
