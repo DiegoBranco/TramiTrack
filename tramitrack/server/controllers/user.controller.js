@@ -5,13 +5,18 @@ exports.register = async (req, res) => {
   try {
     const newUser = new User(req.body);
     await newUser.save();
-    // omit password in response
-    const { password, ...userData } = newUser.toObject();
+    // omit password and cedula in response
+    const { password, cedula, ...userData } = newUser.toObject();
     res.status(201).json({ message: "Usuario creado", data: userData });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error al registrar", error: error.message });
+    // duplicate key error handling could detect cedula or correo
+    let msg = "Error al registrar";
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      msg = `El ${field} ya está registrado`;
+      return res.status(400).json({ message: msg });
+    }
+    res.status(500).json({ message: msg, error: error.message });
   }
 };
 
@@ -25,8 +30,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // don't send password back
-    const { password: pw, ...userData } = user.toObject();
+    // don't send password or cedula back
+    const { password: pw, cedula, ...userData } = user.toObject();
     res.json({ message: "Login exitoso", user: userData });
   } catch (error) {
     res
