@@ -6,7 +6,7 @@ exports.register = async (req, res) => {
     const newUser = new User(req.body);
     await newUser.save();
     // omit password and cedula in response
-    const { password, cedula, ...userData } = newUser.toObject();
+    const { password, ...userData } = newUser.toObject();
     res.status(201).json({ message: "Usuario creado", data: userData });
   } catch (error) {
     // duplicate key error handling could detect cedula or correo
@@ -30,8 +30,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // don't send password or cedula back
-    const { password: pw, cedula, ...userData } = user.toObject();
+    const { password: pw, ...userData } = user.toObject();
     res.json({ message: "Login exitoso", user: userData });
   } catch (error) {
     res
