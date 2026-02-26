@@ -12,6 +12,7 @@ interface User {
   rol: string;
   createdAt?: string;
   updatedAt?: string;
+  // cedula intentionally omitted from store
 }
 
 export const useAuthStore = defineStore("auth", {
@@ -30,7 +31,8 @@ export const useAuthStore = defineStore("auth", {
         correo,
         password,
       });
-      this.user = response.data.user;
+      const { cedula, ...userNoCedula } = response.data.user;
+      this.user = userNoCedula;
       // store in localStorage
       localStorage.setItem("auth_user", JSON.stringify(this.user));
       return this.user;
