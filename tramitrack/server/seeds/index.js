@@ -29,7 +29,7 @@ const seedDatabase = async () => {
         cedula: "25789012",
         correo: "daniela.admin@tramitrack.com",
         password: "admin",
-        rol: "administrador",
+        rol: "admin",
       },
       {
         nombre: "Admin",
@@ -37,7 +37,7 @@ const seedDatabase = async () => {
         cedula: "10111222",
         correo: "admin@tramitrack.com",
         password: "admin",
-        rol: "administrador",
+        rol: "admin",
       },
     ];
 
