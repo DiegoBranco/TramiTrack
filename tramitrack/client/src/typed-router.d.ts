@@ -26,6 +26,7 @@ declare module 'vue-router/auto-routes' {
     '/home': RouteRecordInfo<'/home', '/home', Record<never, never>, Record<never, never>>,
     '/info-tramite': RouteRecordInfo<'/info-tramite', '/info-tramite', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
+    '/profile': RouteRecordInfo<'/profile', '/profile', Record<never, never>, Record<never, never>>,
     '/solicitar-constancia': RouteRecordInfo<'/solicitar-constancia', '/solicitar-constancia', Record<never, never>, Record<never, never>>,
     '/tipo-tramite': RouteRecordInfo<'/tipo-tramite', '/tipo-tramite', Record<never, never>, Record<never, never>>,
   }
@@ -71,6 +72,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/login.vue': {
       routes: '/login'
+      views: never
+    }
+    'src/pages/profile.vue': {
+      routes: '/profile'
       views: never
     }
     'src/pages/solicitar-constancia.vue': {

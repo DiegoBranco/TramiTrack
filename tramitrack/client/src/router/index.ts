@@ -52,7 +52,7 @@ router.beforeEach((to, from, next) => {
   if (
     to.path.includes("admin") &&
     auth.isAuthenticated &&
-    auth.user?.rol !== "admin"
+    auth.user?.rol !== "administrador"
   ) {
     return next("/home");
   }
