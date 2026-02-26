@@ -46,7 +46,18 @@ const breadcrumbs = computed(() => {
     ? route.path.substring(1)
     : route.path;
 
-  // Mapa de jerarquías manual
+  // Verificar si es una ruta dinámica de trámite (ej: tramites/69a0bb4062f2366728dd176a)
+  const tramiteMatch = pathKey.match(/^tramites\/(.+)$/);
+
+  if (tramiteMatch) {
+    // Es una ruta de detalle de trámite - solo Inicio > Detalles de trámite
+    return [
+      { title: "Inicio", path: "/home" },
+      { title: "Detalles de trámite", path: route.path },
+    ];
+  }
+
+  // Mapa de jerarquías manual para rutas estáticas
   const hierarchyMap: Record<string, { title: string; path: string }[]> = {
     home: [{ title: "Inicio", path: "/home" }],
     "tipo-tramite": [
@@ -75,15 +86,21 @@ const breadcrumbs = computed(() => {
   };
 
   // Retornar el mapa o un fallback si no existe
-  return (
-    hierarchyMap[pathKey] || [
-      {
-        title: "Inicio",
-        path: route.path.includes("admin") ? "/admin-home" : "/home",
-      },
-      { title: pathKey.replace(/-/g, " ") || "Inicio", path: route.path },
-    ]
-  );
+  if (hierarchyMap[pathKey]) {
+    return hierarchyMap[pathKey];
+  }
+
+  // Fallback genérico
+  return [
+    {
+      title: "Inicio",
+      path: route.path.includes("admin") ? "/admin-home" : "/home",
+    },
+    {
+      title: pathKey.split("/").pop()?.replace(/-/g, " ") || "Inicio",
+      path: route.path,
+    },
+  ];
 });
 </script>
 

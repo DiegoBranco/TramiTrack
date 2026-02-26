@@ -31,7 +31,7 @@
             color="primary"
             prepend-icon="mdi-plus"
             class="text-none"
-            to="/tipo-tramite"
+            @click="irASolicitarTramite"
           >
             Solicitar Trámite
           </v-btn>
@@ -124,9 +124,7 @@ import AppBreadcrumbs from "@/components/AppBreadcrumbs.vue";
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import solicitudService, {
-  type TramiteResponse,
-} from "@/services/solicitudService";
+import solicitudService from "@/services/solicitudService";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -176,6 +174,11 @@ const getStatusColor = (estado: string) =>
   solicitudService.getStatusColor(estado);
 const formatDate = (date: string) => solicitudService.formatDate(date);
 
+// Navegar a la página de solicitar trámite
+const irASolicitarTramite = () => {
+  router.push("/tipo-tramite");
+};
+
 // Cargar trámites del usuario
 const loadMisTramites = async () => {
   if (!authStore.isAuthenticated) {
@@ -196,11 +199,7 @@ const loadMisTramites = async () => {
     );
   } catch (error) {
     console.error("Error cargando trámites:", error);
-
-    // En desarrollo, mostrar datos de ejemplo
-    if (import.meta.env.DEV) {
-      tramites.value = getEjemplosTramites();
-    }
+    tramites.value = [];
   } finally {
     loading.value = false;
   }
@@ -209,33 +208,6 @@ const loadMisTramites = async () => {
 // Función para ver detalle del trámite
 const verDetalle = (item: any) => {
   router.push(`/tramites/${item._id}`);
-};
-
-// Datos de ejemplo para desarrollo
-const getEjemplosTramites = () => {
-  return [
-    {
-      _id: "1",
-      numero_seguimiento: "TRM-000001",
-      tipo: "Constancia de Estudios",
-      fecha_solicitud: new Date().toISOString(),
-      estado: "pendiente",
-    },
-    {
-      _id: "2",
-      numero_seguimiento: "TRM-000002",
-      tipo: "Constancia de Inscripción",
-      fecha_solicitud: new Date(Date.now() - 86400000).toISOString(),
-      estado: "en_proceso",
-    },
-    {
-      _id: "3",
-      numero_seguimiento: "TRM-000003",
-      tipo: "Constancia de Notas",
-      fecha_solicitud: new Date(Date.now() - 172800000).toISOString(),
-      estado: "completado",
-    },
-  ];
 };
 
 onMounted(() => {
