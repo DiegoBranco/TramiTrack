@@ -20,7 +20,7 @@
           </v-icon>
 
           <h2 class="font-bitter text-h5 font-weight-bold mb-1">
-            Crear Trámite
+            Solicitar Trámite
           </h2>
 
           <p class="text-body-2 text-grey-darken-1 mb-4">
@@ -31,70 +31,89 @@
             color="primary"
             prepend-icon="mdi-plus"
             class="text-none"
-            to="/tipo-tramite"
+            @click="irASolicitarTramite"
           >
-            Agregar Trámite
+            Solicitar Trámite
           </v-btn>
         </v-card>
       </v-col>
     </v-row>
 
-    <v-card class="rounded-lg pa-4" elevation="1">
-      <v-toolbar color="transparent" density="comfortable">
-        <v-toolbar-title class="font-bitter text-h4 font-weight-bold">
-          Trámites Activos
+    <v-card class="rounded-lg" elevation="1">
+      <v-toolbar color="transparent" density="compact">
+        <v-toolbar-title class="font-bitter text-h5 font-weight-bold">
+          Mis Trámites
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field
-          v-model="search"
-          prepend-inner-icon="mdi-magnify"
-          label="Buscar..."
-          variant="solo-filled"
-          flat
-          hide-details
-          density="compact"
-          class="max-width-300"
-        ></v-text-field>
         <v-btn
-          icon="mdi-filter-variant"
+          icon="mdi-refresh"
           variant="text"
           color="secondary"
+          size="small"
+          @click="loadMisTramites"
+          :loading="loading"
         ></v-btn>
       </v-toolbar>
 
-      <v-data-table
-        :headers="headers"
-        :items="tramites"
-        :search="search"
-        class="mt-4"
-      >
-        <template v-slot:item.estudiante="{ item }">
-          <div class="d-flex align-center ga-3 py-2">
-            <v-avatar color="primary" size="32">
-              <span class="text-caption text-white">{{
-                getInitials(item.estudiante)
-              }}</span>
-            </v-avatar>
+      <v-divider></v-divider>
+
+      <div style="max-height: 400px; overflow-y: auto">
+        <v-data-table
+          :headers="headers"
+          :items="filteredTramites"
+          :search="search"
+          density="compact"
+          class="compact-table"
+          hide-default-footer
+          :loading="loading"
+          loading-text="Cargando trámites..."
+          no-data-text="No tienes trámites solicitados"
+        >
+          <template v-slot:item.numero_seguimiento="{ item }">
             <span class="text-body-2 font-weight-medium">{{
-              item.estudiante
+              item.numero_seguimiento
             }}</span>
-          </div>
-        </template>
+          </template>
 
-        <template v-slot:item.estatus="{ item }">
-          <v-chip
-            :color="getStatusColor(item.estatus)"
-            size="small"
-            class="font-weight-bold text-uppercase"
-            variant="flat"
-          >
-            {{ item.estatus }}
-          </v-chip>
-        </template>
-      </v-data-table>
+          <template v-slot:item.tipo="{ item }">
+            <span class="text-body-2">{{ item.tipo }}</span>
+          </template>
 
-      <div class="text-right text-caption text-grey mt-2">
-        Mostrando {{ tramites.length }} de {{ tramites.length }}
+          <template v-slot:item.fecha_solicitud="{ item }">
+            <span class="text-body-2">{{
+              formatDate(item.fecha_solicitud)
+            }}</span>
+          </template>
+
+          <template v-slot:item.estado="{ item }">
+            <v-chip
+              text-color="white"
+              :color="getStatusColor(item.estado)"
+              size="x-small"
+              class="font-weight-bold text-uppercase text-white"
+              variant="flat"
+            >
+              {{ formatEstado(item.estado) }}
+            </v-chip>
+          </template>
+
+          <template v-slot:item.actions="{ item }">
+            <v-btn
+              icon="mdi-eye"
+              variant="text"
+              color="primary"
+              size="small"
+              @click="verDetalle(item)"
+            ></v-btn>
+          </template>
+        </v-data-table>
+      </div>
+
+      <v-divider></v-divider>
+
+      <div class="d-flex justify-end pa-2 text-caption text-grey">
+        Mostrando {{ filteredTramites.length }}
+        {{ filteredTramites.length === 1 ? "trámite" : "trámites" }}
       </div>
     </v-card>
   </v-container>
@@ -102,65 +121,98 @@
 
 <script setup lang="ts">
 import AppBreadcrumbs from "@/components/AppBreadcrumbs.vue";
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import solicitudService from "@/services/solicitudService";
 
+const router = useRouter();
+const authStore = useAuthStore();
 const search = ref("");
+const loading = ref(false);
+const tramites = ref<any[]>([]);
 
+// Headers de la tabla
 const headers = [
-  { title: "Estudiante", key: "estudiante", align: "start" as const },
+  {
+    title: "N° Seguimiento",
+    key: "numero_seguimiento",
+    align: "start" as const,
+  },
   { title: "Tipo de Trámite", key: "tipo", align: "start" as const },
-  { title: "Fecha", key: "fecha", align: "start" as const },
-  { title: "Estatus", key: "estatus", align: "center" as const },
+  {
+    title: "Fecha Solicitud",
+    key: "fecha_solicitud",
+    align: "start" as const,
+    width: "120px",
+  },
+  { title: "Estatus", key: "estado", align: "center" as const, width: "100px" },
+  {
+    title: "Acciones",
+    key: "actions",
+    align: "center" as const,
+    width: "60px",
+    sortable: false,
+  },
 ];
 
-const tramites = ref([
-  {
-    estudiante: "María Pérez",
-    tipo: "Constancia de Estudios",
-    fecha: "15/02/2026",
-    estatus: "En Proceso",
-  },
-  {
-    estudiante: "Carlos Roberto Martínez",
-    tipo: "Constancia de Inscripción",
-    fecha: "14/02/2026",
-    estatus: "Completado",
-  },
-  {
-    estudiante: "Ana Sofía Pérez",
-    tipo: "Constancia de Notas",
-    fecha: "13/02/2026",
-    estatus: "Pendiente",
-  },
-  {
-    estudiante: "Luis Fernando Torres",
-    tipo: "Constancia de Inscripción",
-    fecha: "12/02/2026",
-    estatus: "En Proceso",
-  },
-]);
+// Trámites filtrados por búsqueda
+const filteredTramites = computed(() => {
+  if (!search.value) return tramites.value;
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Completado":
-      return "success";
-    case "En Proceso":
-      return "accent";
-    case "Pendiente":
-      return "secondary";
-    default:
-      return "grey";
+  const searchLower = search.value.toLowerCase();
+  return tramites.value.filter(
+    (t) =>
+      t.numero_seguimiento?.toLowerCase().includes(searchLower) ||
+      t.tipo?.toLowerCase().includes(searchLower),
+  );
+});
+
+// Usar métodos del servicio para formateo
+const formatEstado = (estado: string) => solicitudService.formatEstado(estado);
+const getStatusColor = (estado: string) =>
+  solicitudService.getStatusColor(estado);
+const formatDate = (date: string) => solicitudService.formatDate(date);
+
+// Navegar a la página de solicitar trámite
+const irASolicitarTramite = () => {
+  router.push("/tipo-tramite");
+};
+
+// Cargar trámites del usuario
+const loadMisTramites = async () => {
+  if (!authStore.isAuthenticated) {
+    router.push("/login");
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const data = await solicitudService.getMy(authStore.user!._id);
+    tramites.value = solicitudService.transformToTableFormat(data);
+
+    // Ordenar por fecha (más reciente primero)
+    tramites.value.sort(
+      (a, b) =>
+        new Date(b.fecha_solicitud).getTime() -
+        new Date(a.fecha_solicitud).getTime(),
+    );
+  } catch (error) {
+    console.error("Error cargando trámites:", error);
+    tramites.value = [];
+  } finally {
+    loading.value = false;
   }
 };
 
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+// Función para ver detalle del trámite
+const verDetalle = (item: any) => {
+  router.push(`/tramites/${item._id}`);
 };
+
+onMounted(() => {
+  loadMisTramites();
+});
 </script>
 
 <style scoped>
@@ -168,11 +220,40 @@ const getInitials = (name: string) => {
   font-family: "Bitter", serif !important;
 }
 
-.max-width-300 {
-  max-width: 300px;
+.max-width-200 {
+  max-width: 200px;
 }
 
-:deep(.v-data-table-header) {
-  background-color: #f9f9f9;
+.compact-table {
+  font-size: 0.875rem;
+}
+
+.compact-table :deep(th) {
+  padding: 8px 12px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #666 !important;
+  background-color: #f5f5f5 !important;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.compact-table :deep(td) {
+  padding: 8px 12px !important;
+}
+
+.compact-table :deep(.v-data-table__tr) {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.compact-table :deep(.v-data-table__tr:last-child) {
+  border-bottom: none;
+}
+
+.compact-table :deep(.v-data-table__loader) {
+  padding: 16px;
 }
 </style>

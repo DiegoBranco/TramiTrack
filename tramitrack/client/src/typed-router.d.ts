@@ -29,6 +29,7 @@ declare module 'vue-router/auto-routes' {
     '/profile': RouteRecordInfo<'/profile', '/profile', Record<never, never>, Record<never, never>>,
     '/solicitar-constancia': RouteRecordInfo<'/solicitar-constancia', '/solicitar-constancia', Record<never, never>, Record<never, never>>,
     '/tipo-tramite': RouteRecordInfo<'/tipo-tramite', '/tipo-tramite', Record<never, never>, Record<never, never>>,
+    '/tramites/[id]': RouteRecordInfo<'/tramites/[id]', '/tramites/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
   }
 
   /**
@@ -84,6 +85,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/tipo-tramite.vue': {
       routes: '/tipo-tramite'
+      views: never
+    }
+    'src/pages/tramites/[id].vue': {
+      routes: '/tramites/[id]'
       views: never
     }
   }

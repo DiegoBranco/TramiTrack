@@ -85,6 +85,8 @@
         :headers="headers"
         :items="tramites"
         :search="search"
+        :loading="loading"
+        loading-text="Cargando trámites..."
         class="mt-4"
       >
         <template v-slot:item.estudiante="{ item }">
@@ -107,8 +109,18 @@
             class="font-weight-bold text-uppercase"
             variant="flat"
           >
-            {{ item.estatus }}
+            {{ formatEstado(item.estatus) }}
           </v-chip>
+        </template>
+
+        <template v-slot:item.actions="{ item }">
+          <v-btn
+            icon="mdi-eye"
+            variant="text"
+            color="primary"
+            size="small"
+            @click="verDetalle(item)"
+          ></v-btn>
         </template>
       </v-data-table>
 
@@ -121,58 +133,56 @@
 
 <script setup lang="ts">
 import AppBreadcrumbs from "@/components/AppBreadcrumbs.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import solicitudService from "@/services/solicitudService";
 
+const router = useRouter();
 const search = ref("");
+const loading = ref(false);
 
 const headers = [
   { title: "Estudiante", key: "estudiante", align: "start" as const },
   { title: "Tipo de Trámite", key: "tipo", align: "start" as const },
   { title: "Fecha", key: "fecha", align: "start" as const },
   { title: "Estatus", key: "estatus", align: "center" as const },
+  {
+    title: "Acciones",
+    key: "actions",
+    align: "center" as const,
+    sortable: false,
+  },
 ];
 
-const tramites = ref([
-  {
-    estudiante: "María Pérez",
-    tipo: "Constancia de Estudios",
-    fecha: "15/02/2026",
-    estatus: "En Proceso",
-  },
-  {
-    estudiante: "Carlos Roberto Martínez",
-    tipo: "Constancia de Inscripción",
-    fecha: "14/02/2026",
-    estatus: "Completado",
-  },
-  {
-    estudiante: "Ana Sofía Pérez",
-    tipo: "Constancia de Notas",
-    fecha: "13/02/2026",
-    estatus: "Pendiente",
-  },
-  {
-    estudiante: "Luis Fernando Torres",
-    tipo: "Constancia de Inscripción",
-    fecha: "12/02/2026",
-    estatus: "En Proceso",
-  },
-]);
+const tramites = ref<any[]>([]);
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Completado":
-      return "success";
-    case "En Proceso":
-      return "accent";
-    case "Pendiente":
-      return "secondary";
-    default:
-      return "grey";
+const loadTramites = async () => {
+  loading.value = true;
+  try {
+    const data = await solicitudService.getAll();
+    tramites.value = data.map((item) => ({
+      _id: item._id,
+      estudiante: `${item.estudiante_id?.nombre || ""} ${item.estudiante_id?.apellido || ""}`.trim(),
+      tipo: item.tramiteType_id?.nombre || "N/A",
+      fecha: solicitudService.formatDate(item.fecha_solicitud),
+      estatus: item.estado,
+    }));
+  } catch (error) {
+    console.error("Error cargando trámites de admin:", error);
+    tramites.value = [];
+  } finally {
+    loading.value = false;
   }
 };
 
+const getStatusColor = (status: string) => {
+  return solicitudService.getStatusColor(status);
+};
+
+const formatEstado = (status: string) => solicitudService.formatEstado(status);
+
 const getInitials = (name: string) => {
+  if (!name) return "NA";
   return name
     .split(" ")
     .map((n) => n[0])
@@ -180,6 +190,18 @@ const getInitials = (name: string) => {
     .toUpperCase()
     .slice(0, 2);
 };
+
+const verDetalle = (item: any) => {
+  if (!item?._id) return;
+  router.push({
+    path: "/admin-info-tramite",
+    query: { id: item._id },
+  });
+};
+
+onMounted(() => {
+  loadTramites();
+});
 </script>
 
 <style scoped>

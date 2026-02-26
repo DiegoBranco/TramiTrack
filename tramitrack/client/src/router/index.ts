@@ -19,40 +19,28 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
+  const routeExists = to.matched.length > 0;
 
-  const routeExists = router
-    .getRoutes()
-    .some((route) => route.path === to.path);
-
-  // si la ruta no existe o es la raíz, redirigir según estado de auth
   if (!routeExists || to.path === "/") {
     if (!auth.isAuthenticated) {
       return next("/login");
     } else {
-      // Si está autenticado pero la ruta no existe, mandarlo a su home correspondiente
       return next(auth.user?.rol === "admin" ? "/admin-home" : "/home");
     }
   }
 
-  // si nO está autenticado y la ruta no es /login, mandarlo a /login
   if (to.path !== "/login" && !auth.isAuthenticated) {
     return next("/login");
   }
 
-  // si ya está autenticado e intenta entrar a /login, redirigir según su rol
   if (to.path === "/login" && auth.isAuthenticated) {
-    if (auth.user?.rol === "admin") {
-      return next("/admin-home");
-    } else {
-      return next("/home");
-    }
+    return next(auth.user?.rol === "admin" ? "/admin-home" : "/home");
   }
 
-  // Si la ruta contiene "admin" y el usuario no tiene ese rol, mandarlo al home normal
   if (
     to.path.includes("admin") &&
     auth.isAuthenticated &&
-    auth.user?.rol !== "administrador"
+    auth.user?.rol !== "admin"
   ) {
     return next("/home");
   }
