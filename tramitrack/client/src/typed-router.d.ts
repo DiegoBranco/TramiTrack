@@ -19,6 +19,7 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
+    '/admin-edit-tramite': RouteRecordInfo<'/admin-edit-tramite', '/admin-edit-tramite', Record<never, never>, Record<never, never>>,
     '/admin-home': RouteRecordInfo<'/admin-home', '/admin-home', Record<never, never>, Record<never, never>>,
     '/admin-info-tramite': RouteRecordInfo<'/admin-info-tramite', '/admin-info-tramite', Record<never, never>, Record<never, never>>,
     '/admin-profile': RouteRecordInfo<'/admin-profile', '/admin-profile', Record<never, never>, Record<never, never>>,
@@ -46,6 +47,10 @@ declare module 'vue-router/auto-routes' {
   export interface _RouteFileInfoMap {
     'src/pages/index.vue': {
       routes: '/'
+      views: never
+    }
+    'src/pages/admin-edit-tramite.vue': {
+      routes: '/admin-edit-tramite'
       views: never
     }
     'src/pages/admin-home.vue': {
