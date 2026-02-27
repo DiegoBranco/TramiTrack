@@ -483,10 +483,6 @@ const estadoProgreso = computed(() => {
         color: "success",
         fecha: formatDate(tramite.value?.updatedAt),
       };
-      progreso.entregado = {
-        color: "success",
-        fecha: formatDate(tramite.value?.updatedAt),
-      };
       break;
     case "entregado":
       progreso.procesando = {
