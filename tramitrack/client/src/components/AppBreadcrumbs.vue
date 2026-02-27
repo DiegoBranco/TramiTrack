@@ -69,6 +69,10 @@ const breadcrumbs = computed(() => {
       { title: "Tipos de Trámite", path: "/tipo-tramite" },
       { title: "Solicitud", path: "/solicitar-constancia" },
     ],
+    "info-tramite": [
+      { title: "Inicio", path: "/home" },
+      { title: "Detalles del trámite", path: "/info-tramite" },
+    ],
     "admin-home": [{ title: "Inicio", path: "/admin-home" }],
     "admin-profile": [
       { title: "Inicio", path: "/admin-home" },

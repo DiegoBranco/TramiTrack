@@ -105,6 +105,52 @@ class SolicitudService {
   }
 
   /**
+   * Obtener todas las solicitudes (vista admin)
+   */
+  async getAll(params?: {
+    estado?: string;
+    tramiteType_id?: string;
+  }): Promise<TramiteResponse[]> {
+    try {
+      const response = await axios.get(this.baseUrl, { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error en solicitudService.getAll:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar estado y observaciones (admin)
+   */
+  async updateEstado(id: string, payload: { estado: string; observaciones: string }) {
+    try {
+      const response = await axios.patch(`${this.baseUrl}/${id}/estado`, payload);
+      return response.data;
+    } catch (error) {
+      console.error("Error en solicitudService.updateEstado:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Subir documento final del trámite (admin)
+   */
+  async uploadDocumentoFinal(id: string, file: File) {
+    try {
+      const formData = new FormData();
+      formData.append("documentoFinal", file);
+      const response = await axios.post(`${this.baseUrl}/${id}/documento`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error en solicitudService.uploadDocumentoFinal:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Formatear estado para mostrar en UI
    */
   formatEstado(estado: string): string {
