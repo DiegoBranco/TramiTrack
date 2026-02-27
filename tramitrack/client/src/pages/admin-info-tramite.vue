@@ -17,7 +17,9 @@
     <div v-else-if="error" class="text-center py-8">
       <v-icon icon="mdi-alert-circle-outline" size="56" color="error"></v-icon>
       <p class="text-h6 mt-3 text-error">{{ error }}</p>
-      <v-btn class="mt-4" color="primary" @click="loadDetalle">Reintentar</v-btn>
+      <v-btn class="mt-4" color="primary" @click="loadDetalle"
+        >Reintentar</v-btn
+      >
     </div>
 
     <template v-else-if="detalle">
@@ -65,7 +67,9 @@
                 </p>
 
                 <p class="field-title">Fecha solicitada:</p>
-                <p class="text-body-1">{{ formatDate(detalle.fecha_solicitud) }}</p>
+                <p class="text-body-1">
+                  {{ formatDate(detalle.fecha_solicitud) }}
+                </p>
               </v-col>
               <v-col cols="12" sm="6">
                 <p class="field-title">Requisitos:</p>
@@ -80,7 +84,9 @@
           </v-card>
 
           <v-card class="pa-5 rounded-lg mb-4" elevation="1">
-            <h2 class="font-bitter text-h5 font-weight-bold mb-4">SEGUIMIENTO</h2>
+            <h2 class="font-bitter text-h5 font-weight-bold mb-4">
+              SEGUIMIENTO
+            </h2>
             <p class="text-body-1 font-weight-bold mb-2">Observaciones</p>
             <v-text-field
               v-model="form.observaciones"
@@ -335,7 +341,10 @@ const uploadDocumento = async () => {
   if (!tramiteId.value || !documentoFinal.value) return;
   uploadingDocumento.value = true;
   try {
-    await solicitudService.uploadDocumentoFinal(tramiteId.value, documentoFinal.value);
+    await solicitudService.uploadDocumentoFinal(
+      tramiteId.value,
+      documentoFinal.value,
+    );
     documentoFinal.value = null;
     await loadDetalle();
   } catch (err) {

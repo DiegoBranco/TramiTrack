@@ -1,6 +1,6 @@
 <template>
-  <v-container class="pa-6 pa-sm-10 bg-grey-lighten-4" fluid>
-    <app-breadcrumbs class="mb-4" />
+  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+    <app-breadcrumbs class="mb-2" />
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-10">
@@ -42,8 +42,8 @@
         </p>
       </header>
 
-      <v-row>
-        <v-col cols="12" md="4" lg="3">
+      <v-row align="stretch">
+        <v-col cols="12" md="4" lg="3" class="d-flex flex-column">
           <!-- Card de Requisitos -->
           <v-card class="pa-4 rounded-lg mb-4" elevation="1">
             <h2 class="font-bitter text-h6 font-weight-bold text-center mb-4">
@@ -103,7 +103,7 @@
           </v-card>
 
           <!-- Card: Datos Bancarios -->
-          <v-card class="pa-4 rounded-lg" elevation="1">
+          <v-card class="pa-4 rounded-lg flex-grow-1" elevation="1">
             <h2 class="font-bitter text-h6 font-weight-bold text-center mb-4">
               DATOS BANCARIOS
             </h2>
@@ -163,8 +163,8 @@
         </v-col>
 
         <v-col cols="12" md="8" lg="9">
-          <v-card class="pa-6 rounded-lg" elevation="1">
-            <v-form ref="form" v-model="valid">
+          <v-card class="pa-6 rounded-lg fill-height d-flex flex-column" elevation="1">
+            <v-form ref="form" v-model="valid" class="d-flex flex-column flex-grow-1">
               <v-row dense>
                 <v-col cols="12" sm="6">
                   <label class="text-caption font-weight-bold mb-4 mt-4 d-block"
@@ -316,7 +316,7 @@
                 </v-col>
               </v-row>
 
-              <div class="d-flex justify-end ga-3 mt-6">
+              <div class="d-flex justify-end ga-3 mt-auto pt-6">
                 <v-btn
                   variant="flat"
                   color="grey-lighten-2"
@@ -506,16 +506,36 @@ onMounted(() => {
   border: 2px dashed #00535a !important;
 }
 
-:deep(.file-input-custom .v-field__input) {
-  min-height: 40px !important;
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
+:deep(.file-input-custom .v-field) {
+  min-height: 160px !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+:deep(.file-input-custom .v-field__field) {
+  flex: none !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+:deep(.file-input-custom .v-label) {
+  position: static !important;
+  transform: none !important;
   font-size: 0.875rem !important;
+  opacity: 1 !important;
+  color: rgba(0, 0, 0, 0.6) !important;
+  white-space: nowrap !important;
+}
+
+:deep(.file-input-custom .v-field__input) {
+  display: none !important;
 }
 
 :deep(.file-input-custom .v-field__prepend-inner) {
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  align-self: center !important;
+  padding-right: 8px !important;
 }
 
 /* Estilo para el hint/mensaje de ayuda */
