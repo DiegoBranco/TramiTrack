@@ -189,32 +189,20 @@
               <!-- Acciones -->
               <div class="d-flex flex-column ga-2">
                 <v-btn
-                  v-if="tramite.comprobante_id"
-                  color="primary"
-                  variant="outlined"
+                  :color="['entregado', 'completado'].includes(tramite.estado) ? 'primary' : 'grey-darken-1'"
+                  :variant="['entregado', 'completado'].includes(tramite.estado) ? 'flat' : 'outlined'"
                   prepend-icon="mdi-download"
                   block
                   size="small"
-                  @click="descargarComprobante"
-                >
-                  Descargar Comprobante
-                </v-btn>
-
-                <v-btn
-                  v-if="tramite.documento_final && tramite.estado === 'completado'"
-                  color="success"
-                  variant="outlined"
-                  prepend-icon="mdi-file-pdf-box"
-                  block
-                  size="small"
+                  :disabled="!['entregado', 'completado'].includes(tramite.estado)"
                   @click="descargarDocumentoFinal"
                 >
-                  Descargar Documento Final
+                  Descargar {{ tramite.tramiteType_id?.nombre || 'Documento' }}
                 </v-btn>
 
                 <v-btn
                   color="secondary"
-                  variant="text"
+                  variant="outlined"
                   prepend-icon="mdi-headset"
                   block
                   size="small"
@@ -254,7 +242,7 @@
                     <v-icon v-else-if="estadoProgreso.procesando.color === 'error'" size="16" color="white">mdi-close-thick</v-icon>
                     <div v-else-if="estadoProgreso.procesando.color !== 'grey'" class="inner-dot"></div>
                   </div>
-                  <span class="step-label">Procesando</span>
+                  <span class="step-label">{{ estadoProgreso.procesando.color === 'error' ? 'Rechazado' : 'Procesando' }}</span>
                   <span class="step-date">{{ estadoProgreso.procesando.fecha || 'Pendiente' }}</span>
                 </div>
 
@@ -487,6 +475,16 @@ const estadoProgreso = computed(() => {
       };
       break;
     case "completado":
+      progreso.procesando = {
+        color: "success",
+        fecha: formatDate(tramite.value?.updatedAt),
+      };
+      progreso.listo = {
+        color: "success",
+        fecha: formatDate(tramite.value?.updatedAt),
+      };
+      break;
+    case "entregado":
       progreso.procesando = {
         color: "success",
         fecha: formatDate(tramite.value?.updatedAt),
