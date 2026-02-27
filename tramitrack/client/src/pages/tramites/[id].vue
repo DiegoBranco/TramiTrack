@@ -254,7 +254,7 @@
                     <v-icon v-else-if="estadoProgreso.procesando.color === 'error'" size="16" color="white">mdi-close-thick</v-icon>
                     <div v-else-if="estadoProgreso.procesando.color !== 'grey'" class="inner-dot"></div>
                   </div>
-                  <span class="step-label">Procesando</span>
+                  <span class="step-label">{{ estadoProgreso.procesando.color === 'error' ? 'Rechazado' : 'Procesando' }}</span>
                   <span class="step-date">{{ estadoProgreso.procesando.fecha || 'Pendiente' }}</span>
                 </div>
 
