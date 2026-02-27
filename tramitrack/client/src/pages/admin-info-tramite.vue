@@ -52,32 +52,33 @@
       </v-row>
 
       <v-row align="stretch">
-        <v-col cols="12" md="7" class="d-flex flex-column">
-          <v-card class="pa-4 rounded-lg mb-4" elevation="1">
+        <!-- INFORMACIÓN GENERAL -->
+        <v-col cols="12" md="7">
+          <v-card class="pa-4 rounded-lg h-100" elevation="1">
             <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
               INFORMACIÓN GENERAL
             </h2>
             <v-row dense>
               <v-col cols="12" sm="6">
-                <p class="field-label">Nombre del Trámite:</p>
-                <p class="text-body-2 mb-2">
+                <p class="text-body-2 font-weight-bold mb-0">Nombre del Trámite:</p>
+                <p class="text-body-2 text-grey-darken-1 mb-2">
                   {{ detalle.tramiteType_id?.nombre || "No disponible" }}
                 </p>
 
-                <p class="field-label">Vigencia:</p>
-                <p class="text-body-2 mb-2">
+                <p class="text-body-2 font-weight-bold mb-0">Vigencia:</p>
+                <p class="text-body-2 text-grey-darken-1 mb-2">
                   {{ formatDate(detalle.fecha_solicitud) }} -
                   {{ formatDate(detalle.fecha_estimada) }}
                 </p>
 
-                <p class="field-label">Fecha solicitada:</p>
-                <p class="text-body-2 mb-0">
+                <p class="text-body-2 font-weight-bold mb-0">Fecha solicitada:</p>
+                <p class="text-body-2 text-grey-darken-1 mb-0">
                   {{ formatDate(detalle.fecha_solicitud) }}
                 </p>
               </v-col>
               <v-col cols="12" sm="6">
-                <p class="field-label">Requisitos:</p>
-                <p class="text-body-2">
+                <p class="text-body-2 font-weight-bold mb-0">Requisitos:</p>
+                <p class="text-body-2 text-grey-darken-1">
                   {{
                     detalle.tramiteType_id?.descripcion ||
                     "Documento oficial emitido por la coordinación académica."
@@ -86,39 +87,11 @@
               </v-col>
             </v-row>
           </v-card>
-
-          <v-card class="pa-4 rounded-lg flex-grow-1" elevation="1">
-            <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
-              SEGUIMIENTO
-            </h2>
-            <p class="text-body-2 font-weight-bold mb-2">Observaciones</p>
-            <v-text-field
-              v-model="form.observaciones"
-              variant="solo-filled"
-              flat
-              density="comfortable"
-              hide-details
-              placeholder="Ingresa las observaciones"
-              class="mb-4"
-            />
-
-            <p class="text-body-2 font-weight-bold mb-2">Estado</p>
-            <v-select
-              v-model="form.estado"
-              :items="estadoOptions"
-              item-title="label"
-              item-value="value"
-              variant="solo-filled"
-              flat
-              density="comfortable"
-              hide-details
-              placeholder="Selecciona el estado de la solicitud"
-            />
-          </v-card>
         </v-col>
 
-        <v-col cols="12" md="5" class="d-flex flex-column">
-          <v-card class="pa-4 rounded-lg mb-4" elevation="1">
+        <!-- INFORMACIÓN DE PAGO -->
+        <v-col cols="12" md="5">
+          <v-card class="pa-4 rounded-lg h-100" elevation="1">
             <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
               INFORMACIÓN DE PAGO
             </h2>
@@ -138,9 +111,7 @@
               <v-col cols="12" sm="6" class="pb-2">
                 <div class="info-grid-item">
                   <v-avatar color="accent" size="30">
-                    <v-icon size="16" color="white"
-                      >mdi-credit-card-outline</v-icon
-                    >
+                    <v-icon size="16" color="white">mdi-credit-card-outline</v-icon>
                   </v-avatar>
                   <div>
                     <p class="label">Cta. de origen</p>
@@ -192,28 +163,67 @@
               </v-col>
             </v-row>
           </v-card>
+        </v-col>
 
-          <v-card class="pa-4 rounded-lg flex-grow-1" elevation="1">
+        <!-- SEGUIMIENTO -->
+        <v-col cols="12" md="7">
+          <v-card class="pa-4 rounded-lg h-100" elevation="1">
+            <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
+              SEGUIMIENTO
+            </h2>
+            <p class="text-body-2 font-weight-bold mb-2">Observaciones</p>
+            <v-text-field
+              v-model="form.observaciones"
+              variant="solo-filled"
+              flat
+              density="comfortable"
+              hide-details
+              placeholder="Ingresa las observaciones"
+              class="mb-4"
+            />
+
+            <p class="text-body-2 font-weight-bold mb-2">Estado</p>
+            <v-select
+              v-model="form.estado"
+              :items="estadoOptions"
+              item-title="label"
+              item-value="value"
+              variant="solo-filled"
+              flat
+              density="comfortable"
+              hide-details
+              placeholder="Selecciona el estado de la solicitud"
+            />
+          </v-card>
+        </v-col>
+
+        <!-- ACCIONES -->
+        <v-col cols="12" md="5">
+          <v-card class="pa-4 rounded-lg h-100 d-flex flex-column" elevation="1">
             <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
               Acciones
             </h2>
-            <v-btn
-              block
-              color="secondary"
-              class="text-none mb-3 btn-text-white"
-              @click="downloadDocumento"
-              :disabled="!hasDownloadableDocument"
-            >
-              Descargar Documentos
-            </v-btn>
-            <v-btn
-              block
-              color="primary"
-              class="text-none btn-text-white"
-              @click="sendNotification"
-            >
-              Enviar Notificación
-            </v-btn>
+            <div class="d-flex flex-column ga-3 my-auto">
+              <v-btn
+                block
+                color="primary"
+                variant="outlined"
+                class="text-none btn-border-bold"
+                @click="downloadDocumento"
+                :disabled="!hasDownloadableDocument"
+              >
+                Descargar Documentos
+              </v-btn>
+              <v-btn
+                block
+                color="secondary"
+                variant="outlined"
+                class="text-none btn-border-bold"
+                @click="sendNotification"
+              >
+                Enviar Notificación
+              </v-btn>
+            </div>
           </v-card>
         </v-col>
       </v-row>
@@ -406,7 +416,7 @@ watch(
 }
 
 .label {
-  font-size: 1.3rem;
+  font-size: 0.875rem;
   line-height: 1.15;
   margin-bottom: 2px;
   color: #2c2d34;
@@ -414,13 +424,17 @@ watch(
 }
 
 .value {
-  font-size: 1.2rem;
+  font-size: 0.8rem;
   color: #6f7285;
 }
 
 .value-link {
   color: #075e68;
   text-decoration: underline;
+}
+
+:deep(.btn-border-bold.v-btn--variant-outlined) {
+  border-width: 3px !important;
 }
 
 :deep(.btn-text-white .v-btn__content) {
