@@ -70,13 +70,13 @@ const seedDatabase = async () => {
         costo: 10,
         dias_habiles: 3,
       },
-      {
-        nombre: "Constancia de Notas",
-        descripcion:
-          "Documento oficial que certifica las materias cursadas y calificaciones",
-        costo: 15,
-        dias_habiles: 10,
-      },
+      //{
+      //nombre: "Constancia de Notas",
+      //descripcion:
+      //"Documento oficial que certifica las materias cursadas y calificaciones",
+      //costo: 15,
+      // dias_habiles: 10,
+      //},
     ];
 
     for (const t of tramites) {
