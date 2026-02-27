@@ -1,6 +1,6 @@
 <template>
-  <v-container class="pa-6 pa-sm-10 bg-grey-lighten-4" fluid>
-    <app-breadcrumbs class="mb-4" />
+  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+    <app-breadcrumbs class="mb-2" />
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-10">
