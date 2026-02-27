@@ -52,47 +52,38 @@
 
       <v-row>
         <!-- Columna izquierda - Información general -->
-        <v-col cols="12" md="8">
-          <v-card class="rounded-lg mb-6" elevation="1">
-            <v-card-item>
+        <v-col cols="12" md="7">
+          <v-card class="rounded-lg mb-4" elevation="1">
+            <v-card-item class="pb-1">
               <v-card-title
-                class="font-bitter text-h5 font-weight-bold px-0 pt-0"
+                class="font-bitter text-subtitle-1 font-weight-bold px-0 pt-0"
               >
                 INFORMACIÓN GENERAL
               </v-card-title>
             </v-card-item>
 
-            <v-card-text>
-              <v-row>
+            <v-card-text class="pt-1">
+              <v-row dense>
                 <v-col cols="12" sm="6">
-                  <p class="text-body-2 text-grey-darken-1 mb-1">
-                    Nombre del Trámite:
-                  </p>
-                  <p class="text-body-1 font-weight-medium mb-4">
+                  <p class="text-caption text-grey-darken-1 mb-0">Nombre del Trámite:</p>
+                  <p class="text-body-2 font-weight-medium mb-2">
                     {{ tramite.tramiteType_id?.nombre || "No especificado" }}
                   </p>
 
-                  <p class="text-body-2 text-grey-darken-1 mb-1">Vigencia:</p>
-                  <p class="text-body-1 font-weight-medium mb-4">
-                    {{
-                      formatVigencia(
-                        tramite.fecha_solicitud,
-                        tramite.fecha_estimada,
-                      )
-                    }}
+                  <p class="text-caption text-grey-darken-1 mb-0">Vigencia:</p>
+                  <p class="text-body-2 font-weight-medium mb-2">
+                    {{ formatVigencia(tramite.fecha_solicitud, tramite.fecha_estimada) }}
                   </p>
 
-                  <p class="text-body-2 text-grey-darken-1 mb-1">
-                    Fecha solicitada:
-                  </p>
-                  <p class="text-body-1 font-weight-medium">
+                  <p class="text-caption text-grey-darken-1 mb-0">Fecha solicitada:</p>
+                  <p class="text-body-2 font-weight-medium mb-0">
                     {{ formatDate(tramite.fecha_solicitud) }}
                   </p>
                 </v-col>
 
                 <v-col cols="12" sm="6">
-                  <p class="text-body-2 text-grey-darken-1 mb-1">Requisitos:</p>
-                  <p class="text-body-1">
+                  <p class="text-caption text-grey-darken-1 mb-0">Requisitos:</p>
+                  <p class="text-body-2">
                     {{
                       tramite.tramiteType_id?.descripcion ||
                       "Documento oficial que certifica las materias cursadas y las calificaciones obtenidas durante el período de estudios."
@@ -109,16 +100,16 @@
             elevation="1"
             v-if="tramite.datos_formulario"
           >
-            <v-card-item>
+            <v-card-item class="pb-1">
               <v-card-title
-                class="font-bitter text-h6 font-weight-bold px-0 pt-0"
+                class="font-bitter text-subtitle-1 font-weight-bold px-0 pt-0"
               >
                 DATOS DEL FORMULARIO
               </v-card-title>
             </v-card-item>
 
-            <v-card-text>
-              <v-row>
+            <v-card-text class="pt-1">
+              <v-row dense>
                 <v-col
                   cols="12"
                   sm="6"
@@ -126,10 +117,10 @@
                   v-for="(value, key) in datosFormularioFiltrados"
                   :key="key"
                 >
-                  <p class="text-body-2 text-grey-darken-1 mb-1">
+                  <p class="text-caption text-grey-darken-1 mb-0">
                     {{ formatLabel(key) }}:
                   </p>
-                  <p class="text-body-1 font-weight-medium">
+                  <p class="text-body-2 font-weight-medium mb-2">
                     {{ formatValue(key, value) }}
                   </p>
                 </v-col>
@@ -138,46 +129,42 @@
           </v-card>
         </v-col>
 
-        <!-- Columna derecha - Información y acciones -->
-        <v-col cols="12" md="4">
+        <!-- Columna derecha - Información, seguimiento y acciones -->
+        <v-col cols="12" md="5">
           <!-- Tarjeta de información -->
           <v-card
-            class="rounded-lg mb-6"
+            class="rounded-lg mb-4"
             elevation="1"
             color="primary-lighten-5"
           >
             <v-card-text>
-              <div class="d-flex align-center mb-4">
-                <v-avatar color="primary" size="40" class="mr-3">
-                  <span class="text-white font-weight-bold">{{
+              <div class="d-flex align-center mb-3">
+                <v-avatar color="primary" size="36" class="mr-3">
+                  <span class="text-white font-weight-bold text-body-2">{{
                     getInitials
                   }}</span>
                 </v-avatar>
                 <div>
-                  <p class="text-body-2 text-grey-darken-1 mb-0">Estudiante</p>
-                  <p class="text-body-1 font-weight-bold mb-0">
+                  <p class="text-caption text-grey-darken-1 mb-0">Estudiante</p>
+                  <p class="text-body-2 font-weight-bold mb-0">
                     {{ estudianteNombre }}
                   </p>
                 </div>
               </div>
 
-              <v-divider class="my-3"></v-divider>
+              <v-divider class="my-2"></v-divider>
 
-              <div class="d-flex justify-space-between align-center mb-2">
-                <span class="text-body-2 text-grey-darken-1"
-                  >Fecha estimada:</span
-                >
-                <span class="text-body-1 font-weight-medium">{{
+              <div class="d-flex justify-space-between align-center mb-1">
+                <span class="text-body-2 text-grey-darken-1">Fecha estimada:</span>
+                <span class="text-body-2 font-weight-medium">{{
                   formatDate(tramite.fecha_estimada)
                 }}</span>
               </div>
 
-              <div class="d-flex justify-space-between align-center mb-2">
-                <span class="text-body-2 text-grey-darken-1"
-                  >Tiempo restante:</span
-                >
+              <div class="d-flex justify-space-between align-center mb-1">
+                <span class="text-body-2 text-grey-darken-1">Tiempo restante:</span>
                 <span
-                  class="text-body-1 font-weight-medium"
+                  class="text-body-2 font-weight-medium"
                   :class="tiempoRestanteColor"
                 >
                   {{ calcularTiempoRestante }}
@@ -185,9 +172,7 @@
               </div>
 
               <div class="d-flex justify-space-between align-center">
-                <span class="text-body-2 text-grey-darken-1"
-                  >Estado actual:</span
-                >
+                <span class="text-body-2 text-grey-darken-1">Estado actual:</span>
                 <v-chip
                   :color="getStatusColor(tramite.estado)"
                   size="small"
@@ -199,7 +184,7 @@
                 </v-chip>
               </div>
 
-              <v-divider class="my-3"></v-divider>
+              <v-divider class="my-2"></v-divider>
 
               <!-- Acciones -->
               <div class="d-flex flex-column ga-2">
@@ -209,22 +194,20 @@
                   variant="outlined"
                   prepend-icon="mdi-download"
                   block
+                  size="small"
                   @click="descargarComprobante"
-                  :loading="descargandoComprobante"
                 >
                   Descargar Comprobante
                 </v-btn>
 
                 <v-btn
-                  v-if="
-                    tramite.documento_final && tramite.estado === 'completado'
-                  "
+                  v-if="tramite.documento_final && tramite.estado === 'completado'"
                   color="success"
                   variant="outlined"
                   prepend-icon="mdi-file-pdf-box"
                   block
+                  size="small"
                   @click="descargarDocumentoFinal"
-                  :loading="descargandoDocumento"
                 >
                   Descargar Documento Final
                 </v-btn>
@@ -234,6 +217,7 @@
                   variant="text"
                   prepend-icon="mdi-headset"
                   block
+                  size="small"
                   href="mailto:soporte@tramitrack.com"
                 >
                   Contactar Soporte
@@ -242,9 +226,68 @@
             </v-card-text>
           </v-card>
 
+          <!-- SEGUIMIENTO -->
+          <v-card class="rounded-lg mb-4" elevation="1">
+            <v-card-item class="pb-1">
+              <v-card-title class="font-bitter text-subtitle-1 font-weight-bold px-0 pt-0">
+                SEGUIMIENTO
+              </v-card-title>
+            </v-card-item>
+
+            <v-card-text class="pt-2">
+              <div class="horizontal-stepper py-1">
+                <!-- Recibido -->
+                <div class="stepper-step">
+                  <div class="step-circle step-completed">
+                    <v-icon size="16" color="white">mdi-check-bold</v-icon>
+                  </div>
+                  <span class="step-label">Recibido</span>
+                  <span class="step-date">{{ formatDate(tramite.fecha_solicitud) }}</span>
+                </div>
+
+                <div class="step-connector" :class="{ 'connector-active': estadoProgreso.procesando.color !== 'grey' }"></div>
+
+                <!-- Procesando -->
+                <div class="stepper-step">
+                  <div class="step-circle" :class="getStepCircleClass(estadoProgreso.procesando.color)">
+                    <v-icon v-if="estadoProgreso.procesando.color === 'success'" size="16" color="white">mdi-check-bold</v-icon>
+                    <v-icon v-else-if="estadoProgreso.procesando.color === 'error'" size="16" color="white">mdi-close-thick</v-icon>
+                    <div v-else-if="estadoProgreso.procesando.color !== 'grey'" class="inner-dot"></div>
+                  </div>
+                  <span class="step-label">Procesando</span>
+                  <span class="step-date">{{ estadoProgreso.procesando.fecha || 'Pendiente' }}</span>
+                </div>
+
+                <div class="step-connector" :class="{ 'connector-active': estadoProgreso.listo.color !== 'grey' }"></div>
+
+                <!-- Listo -->
+                <div class="stepper-step">
+                  <div class="step-circle" :class="getStepCircleClass(estadoProgreso.listo.color)">
+                    <v-icon v-if="estadoProgreso.listo.color === 'success'" size="16" color="white">mdi-check-bold</v-icon>
+                    <div v-else-if="estadoProgreso.listo.color !== 'grey'" class="inner-dot"></div>
+                  </div>
+                  <span class="step-label">Listo</span>
+                  <span class="step-date">{{ estadoProgreso.listo.fecha || 'Pendiente' }}</span>
+                </div>
+
+                <div class="step-connector" :class="{ 'connector-active': estadoProgreso.entregado.color !== 'grey' }"></div>
+
+                <!-- Entregado -->
+                <div class="stepper-step">
+                  <div class="step-circle" :class="getStepCircleClass(estadoProgreso.entregado.color)">
+                    <v-icon v-if="estadoProgreso.entregado.color === 'success'" size="16" color="white">mdi-check-bold</v-icon>
+                    <div v-else-if="estadoProgreso.entregado.color !== 'grey'" class="inner-dot"></div>
+                  </div>
+                  <span class="step-label">Entregado</span>
+                  <span class="step-date">{{ estadoProgreso.entregado.fecha || 'Pendiente' }}</span>
+                </div>
+              </div>
+            </v-card-text>
+          </v-card>
+
           <!-- Observaciones (si existen) -->
           <v-card class="rounded-lg" elevation="1" v-if="tramite.observaciones">
-            <v-card-item>
+            <v-card-item class="pb-1">
               <v-card-title
                 class="font-bitter text-subtitle-1 font-weight-bold px-0 pt-0"
               >
@@ -258,78 +301,12 @@
         </v-col>
       </v-row>
 
-      <!-- Timeline de seguimiento -->
-      <v-row class="mt-4">
-        <v-col cols="12">
-          <v-card class="rounded-lg" elevation="1">
-            <v-card-item>
-              <v-card-title class="font-bitter text-h6 font-weight-bold px-0">
-                SEGUIMIENTO
-              </v-card-title>
-            </v-card-item>
-
-            <v-card-text>
-              <v-timeline
-                density="compact"
-                align="start"
-                class="timeline-custom"
-              >
-                <v-timeline-item dot-color="success" size="small">
-                  <div class="d-flex flex-column">
-                    <span class="font-weight-bold">Recibido</span>
-                    <span class="text-caption text-grey-darken-1">{{
-                      formatDate(tramite.fecha_solicitud)
-                    }}</span>
-                  </div>
-                </v-timeline-item>
-
-                <v-timeline-item
-                  :dot-color="estadoProgreso.procesando.color"
-                  size="small"
-                >
-                  <div class="d-flex flex-column">
-                    <span class="font-weight-bold">Procesando</span>
-                    <span class="text-caption text-grey-darken-1">{{
-                      estadoProgreso.procesando.fecha || "Pendiente"
-                    }}</span>
-                  </div>
-                </v-timeline-item>
-
-                <v-timeline-item
-                  :dot-color="estadoProgreso.listo.color"
-                  size="small"
-                >
-                  <div class="d-flex flex-column">
-                    <span class="font-weight-bold">Listo</span>
-                    <span class="text-caption text-grey-darken-1">{{
-                      estadoProgreso.listo.fecha || "Pendiente"
-                    }}</span>
-                  </div>
-                </v-timeline-item>
-
-                <v-timeline-item
-                  :dot-color="estadoProgreso.entregado.color"
-                  size="small"
-                >
-                  <div class="d-flex flex-column">
-                    <span class="font-weight-bold">Entregado</span>
-                    <span class="text-caption text-grey-darken-1">{{
-                      estadoProgreso.entregado.fecha || "Pendiente"
-                    }}</span>
-                  </div>
-                </v-timeline-item>
-              </v-timeline>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-
       <!-- Botón volver -->
       <v-row class="mt-6">
         <v-col cols="12">
           <v-btn
+            variant="outlined"
             color="primary"
-            variant="text"
             prepend-icon="mdi-arrow-left"
             to="/inicio"
           >
@@ -356,8 +333,6 @@ const authStore = useAuthStore();
 const loading = ref(true);
 const error = ref<string | null>(null);
 const tramite = ref<TramiteResponse | null>(null);
-const descargandoComprobante = ref(false);
-const descargandoDocumento = ref(false);
 
 // Obtener ID de la ruta de forma segura
 const tramiteId = computed(() => {
@@ -376,20 +351,31 @@ const formatDate = (date?: string) =>
 
 // Nombre completo del estudiante
 const estudianteNombre = computed(() => {
-  if (!tramite.value?.estudiante_id) return "No disponible";
+  if (!tramite.value) return "No disponible";
   const estudiante = tramite.value.estudiante_id as any;
-  return (
-    `${estudiante.nombre || ""} ${estudiante.apellido || ""}`.trim() ||
-    "No disponible"
-  );
+  if (estudiante && (estudiante.nombre || estudiante.apellido)) {
+    return `${estudiante.nombre || ""} ${estudiante.apellido || ""}`.trim();
+  }
+  const form = tramite.value.datos_formulario as any;
+  if (form && (form.nombre || form.apellido)) {
+    return `${form.nombre || ""} ${form.apellido || ""}`.trim();
+  }
+  return "No disponible";
 });
 
 // Iniciales del estudiante
 const getInitials = computed(() => {
-  if (!tramite.value?.estudiante_id) return "??";
+  if (!tramite.value) return "??";
   const estudiante = tramite.value.estudiante_id as any;
-  const nombre = estudiante.nombre || "";
-  const apellido = estudiante.apellido || "";
+  let nombre = "", apellido = "";
+  if (estudiante && (estudiante.nombre || estudiante.apellido)) {
+    nombre = estudiante.nombre || "";
+    apellido = estudiante.apellido || "";
+  } else {
+    const form = tramite.value.datos_formulario as any;
+    nombre = form?.nombre || "";
+    apellido = form?.apellido || "";
+  }
   return (nombre.charAt(0) + apellido.charAt(0)).toUpperCase() || "??";
 });
 
@@ -428,7 +414,7 @@ const formatLabel = (key: string) => {
 // Formatear valor según el tipo
 const formatValue = (key: string, value: any) => {
   if (key === "monto" && typeof value === "number") {
-    return `$${value.toLocaleString()}`;
+    return `Bs. ${value.toLocaleString()}`;
   }
   if (key === "fecha_pago" && value) {
     return formatDate(value);
@@ -467,6 +453,17 @@ const tiempoRestanteColor = computed(() => {
 
 // Definir tipo para los items del timeline
 type TimelineItem = { color: string; fecha: string | null };
+
+const getStepCircleClass = (color: string) => {
+  const map: Record<string, string> = {
+    success: "step-completed",
+    primary: "step-active",
+    warning: "step-active",
+    error: "step-error",
+    grey: "step-pending",
+  };
+  return map[color] || "step-pending";
+};
 
 // Progreso del estado para el timeline
 const estadoProgreso = computed(() => {
@@ -517,36 +514,32 @@ const estadoProgreso = computed(() => {
   return progreso;
 });
 
-// Descargar comprobante
-const descargarComprobante = async () => {
+// Descargar comprobante de pago
+const descargarComprobante = () => {
   if (!tramite.value?.comprobante_id) return;
-
-  descargandoComprobante.value = true;
-  try {
-    // futura lógica para descargar el comprobante (si da tiempo)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Descargando comprobante:", tramite.value.comprobante_id);
-  } catch (err) {
-    console.error("Error descargando comprobante:", err);
-  } finally {
-    descargandoComprobante.value = false;
-  }
+  const id =
+    typeof tramite.value.comprobante_id === "string"
+      ? tramite.value.comprobante_id
+      : (tramite.value.comprobante_id as any)?._id;
+  if (!id) return;
+  const url = `${import.meta.env.VITE_API_URL || ""}/api/payment-stubs/stubFile/${id}`;
+  window.open(url, "_blank");
 };
 
-// Descargar documento final
-const descargarDocumentoFinal = async () => {
+// Descargar documento final del trámite
+const descargarDocumentoFinal = () => {
   if (!tramite.value?.documento_final) return;
-
-  descargandoDocumento.value = true;
-  try {
-    // logica para descarga final (si da tiempo)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Descargando documento final:", tramite.value.documento_final);
-  } catch (err) {
-    console.error("Error descargando documento final:", err);
-  } finally {
-    descargandoDocumento.value = false;
-  }
+  const filePath = tramite.value.documento_final;
+  const marker = "/uploads/";
+  const idx = filePath.indexOf(marker);
+  const normalizedPath =
+    idx >= 0
+      ? filePath.slice(idx)
+      : filePath.startsWith("uploads/")
+        ? `/${filePath}`
+        : filePath;
+  const url = `${import.meta.env.VITE_API_URL || ""}${normalizedPath}`;
+  window.open(url, "_blank");
 };
 
 // Cargar detalle del trámite
@@ -586,13 +579,82 @@ onMounted(() => {
   font-family: "Bitter", serif !important;
 }
 
-/* Estilos personalizados para el timeline */
-.timeline-custom :deep(.v-timeline-item__dot) {
-  margin: 0 !important;
+/* Horizontal stepper */
+.horizontal-stepper {
+  display: flex;
+  align-items: flex-start;
 }
 
-.timeline-custom :deep(.v-timeline-item__body) {
-  padding-bottom: 16px !important;
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 60px;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  border: 2px solid #bdbdbd;
+}
+
+.step-completed {
+  background-color: #00535a;
+  border-color: #00535a;
+}
+
+.step-active {
+  background-color: #fb8c00;
+  border-color: #fb8c00;
+}
+
+.step-error {
+  background-color: #f44336;
+  border-color: #f44336;
+}
+
+.step-pending {
+  background-color: #e0e0e0;
+  border-color: #bdbdbd;
+}
+
+.inner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background-color: #e0e0e0;
+  align-self: flex-start;
+  margin-top: 17px;
+  min-width: 10px;
+}
+
+.connector-active {
+  background-color: #00535a;
+}
+
+.step-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.step-date {
+  font-size: 0.75rem;
+  color: #757575;
+  text-align: center;
 }
 
 /* Colores personalizados */

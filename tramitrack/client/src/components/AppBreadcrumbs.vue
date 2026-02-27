@@ -84,7 +84,6 @@ const breadcrumbs = computed(() => {
     ],
     "admin-info-tramite": [
       { title: "Inicio", path: "/admin-home" },
-      { title: "Gestión de Trámites", path: "/admin-tipo-tramite" },
       { title: "Detalles", path: "/admin-info-tramite" },
     ],
   };

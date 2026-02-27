@@ -1,6 +1,10 @@
 <template>
-  <v-container class="pa-6 pa-sm-10 bg-grey-lighten-4" fluid>
-    <AppBreadcrumbs class="mb-4" />
+  <v-container
+    class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4"
+    style="padding-top: 13px"
+    fluid
+  >
+    <AppBreadcrumbs class="mb-2" />
 
     <div v-if="loading" class="text-center py-10">
       <v-progress-circular
@@ -26,7 +30,7 @@
       <v-row class="mb-4" align="center">
         <v-col cols="12">
           <div class="d-flex flex-wrap align-center ga-3">
-            <h1 class="font-bitter text-h3 text-grey-darken-4 font-weight-bold">
+            <h1 class="font-bitter text-h4 text-grey-darken-4 font-weight-bold">
               {{ detalle.tramiteType_id?.nombre || "Detalle del trámite" }}
             </h1>
             <v-chip
@@ -38,7 +42,7 @@
               {{ statusConfig.label }}
             </v-chip>
           </div>
-          <p class="text-h4 text-grey-darken-1">
+          <p class="text-subtitle-1 text-grey-darken-1">
             Número de seguimiento:
             <span class="text-primary font-weight-bold">{{
               detalle.numero_seguimiento || "N/A"
@@ -47,33 +51,33 @@
         </v-col>
       </v-row>
 
-      <v-row>
-        <v-col cols="12" md="7">
-          <v-card class="pa-5 rounded-lg mb-4" elevation="1">
-            <h2 class="font-bitter text-h4 font-weight-bold mb-5">
+      <v-row align="stretch">
+        <v-col cols="12" md="7" class="d-flex flex-column">
+          <v-card class="pa-4 rounded-lg mb-4" elevation="1">
+            <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
               INFORMACIÓN GENERAL
             </h2>
-            <v-row>
+            <v-row dense>
               <v-col cols="12" sm="6">
-                <p class="field-title">Nombre del Trámite:</p>
-                <p class="text-body-1 mb-5">
+                <p class="field-label">Nombre del Trámite:</p>
+                <p class="text-body-2 mb-2">
                   {{ detalle.tramiteType_id?.nombre || "No disponible" }}
                 </p>
 
-                <p class="field-title">Vigencia:</p>
-                <p class="text-body-1 mb-5">
+                <p class="field-label">Vigencia:</p>
+                <p class="text-body-2 mb-2">
                   {{ formatDate(detalle.fecha_solicitud) }} -
                   {{ formatDate(detalle.fecha_estimada) }}
                 </p>
 
-                <p class="field-title">Fecha solicitada:</p>
-                <p class="text-body-1">
+                <p class="field-label">Fecha solicitada:</p>
+                <p class="text-body-2 mb-0">
                   {{ formatDate(detalle.fecha_solicitud) }}
                 </p>
               </v-col>
               <v-col cols="12" sm="6">
-                <p class="field-title">Requisitos:</p>
-                <p class="text-body-1">
+                <p class="field-label">Requisitos:</p>
+                <p class="text-body-2">
                   {{
                     detalle.tramiteType_id?.descripcion ||
                     "Documento oficial emitido por la coordinación académica."
@@ -83,11 +87,11 @@
             </v-row>
           </v-card>
 
-          <v-card class="pa-5 rounded-lg mb-4" elevation="1">
-            <h2 class="font-bitter text-h5 font-weight-bold mb-4">
+          <v-card class="pa-4 rounded-lg flex-grow-1" elevation="1">
+            <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
               SEGUIMIENTO
             </h2>
-            <p class="text-body-1 font-weight-bold mb-2">Observaciones</p>
+            <p class="text-body-2 font-weight-bold mb-2">Observaciones</p>
             <v-text-field
               v-model="form.observaciones"
               variant="solo-filled"
@@ -98,7 +102,7 @@
               class="mb-4"
             />
 
-            <p class="text-body-1 font-weight-bold mb-2">Estado</p>
+            <p class="text-body-2 font-weight-bold mb-2">Estado</p>
             <v-select
               v-model="form.estado"
               :items="estadoOptions"
@@ -113,9 +117,9 @@
           </v-card>
         </v-col>
 
-        <v-col cols="12" md="5">
-          <v-card class="pa-5 rounded-lg mb-4" elevation="1">
-            <h2 class="font-bitter text-h4 font-weight-bold mb-4">
+        <v-col cols="12" md="5" class="d-flex flex-column">
+          <v-card class="pa-4 rounded-lg mb-4" elevation="1">
+            <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
               INFORMACIÓN DE PAGO
             </h2>
             <v-row>
@@ -134,7 +138,9 @@
               <v-col cols="12" sm="6" class="pb-2">
                 <div class="info-grid-item">
                   <v-avatar color="accent" size="30">
-                    <v-icon size="16" color="white">mdi-credit-card-outline</v-icon>
+                    <v-icon size="16" color="white"
+                      >mdi-credit-card-outline</v-icon
+                    >
                   </v-avatar>
                   <div>
                     <p class="label">Cta. de origen</p>
@@ -187,8 +193,10 @@
             </v-row>
           </v-card>
 
-          <v-card class="pa-5 rounded-lg mb-4" elevation="1">
-            <h2 class="font-bitter text-h5 font-weight-bold mb-4">Acciones</h2>
+          <v-card class="pa-4 rounded-lg flex-grow-1" elevation="1">
+            <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
+              Acciones
+            </h2>
             <v-btn
               block
               color="secondary"
@@ -210,7 +218,7 @@
         </v-col>
       </v-row>
 
-      <div class="d-flex justify-center mb-8">
+      <div class="d-flex justify-center mt-6 mb-4">
         <v-btn
           color="primary"
           class="text-none btn-text-white"
