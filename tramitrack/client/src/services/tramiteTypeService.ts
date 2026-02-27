@@ -34,6 +34,26 @@ class TramiteTypeService {
       throw error;
     }
   }
+
+  async create(payload: Partial<TramiteType>): Promise<TramiteType> {
+    try {
+      const response = await axios.post(this.baseUrl, payload);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating tramite type:", error);
+      throw error;
+    }
+  }
+
+  async update(id: string, payload: Partial<TramiteType>): Promise<TramiteType> {
+    try {
+      const response = await axios.put(`${this.baseUrl}/${id}`, payload);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating ${id}:`, error);
+      throw error;
+    }
+  }
 }
 
 export default new TramiteTypeService();

@@ -28,6 +28,7 @@
             color="primary"
             prepend-icon="mdi-plus"
             class="text-none "
+            @click="$router.push('/admin-tipo-tramite')"
           >
             Agregar Trámite
           </v-btn>
