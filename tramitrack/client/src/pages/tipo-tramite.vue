@@ -1,5 +1,5 @@
 <template>
-  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4 d-flex flex-column" style="padding-top: 13px; min-height: calc(100vh - 64px);" fluid>
     <AppBreadcrumbs class="mb-2" />
 
     <!-- Loading State -->
@@ -24,6 +24,7 @@
 
     <!-- Content -->
     <template v-else>
+      <div class="flex-grow-1">
       <header class="mb-10">
         <h1
           class="font-bitter text-h3 text-grey-darken-4 font-weight-bold mb-2"
@@ -64,20 +65,19 @@
           </TramiteCard>
         </v-col>
       </v-row>
+      </div>
 
-      <v-row class="mt-12">
-        <v-col cols="12">
-          <v-btn
-            variant="outlined"
-            color="primary"
-            prepend-icon="mdi-arrow-left"
-            class="text-none rounded-lg px-4"
-            to="/home"
-          >
-            Volver a Inicio
-          </v-btn>
-        </v-col>
-      </v-row>
+      <div class="pt-8">
+        <v-btn
+          variant="outlined"
+          color="primary"
+          prepend-icon="mdi-arrow-left"
+          class="text-none rounded-lg px-4"
+          to="/home"
+        >
+          Volver a Inicio
+        </v-btn>
+      </div>
     </template>
   </v-container>
 </template>

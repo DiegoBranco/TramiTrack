@@ -1,7 +1,8 @@
 <template>
-  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4 d-flex flex-column" style="padding-top: 13px; min-height: calc(100vh - 64px);" fluid>
     <AppBreadcrumbs class="mb-2" />
 
+    <div class="flex-grow-1">
     <h1 class="font-bitter text-h3 font-weight-bold mb-6">
       Perfil de usuario
     </h1>
@@ -64,8 +65,9 @@
         </v-col>
       </v-row>
     </v-card>
+    </div>
 
-    <div class="mt-6 d-flex justify-space-between">
+    <div class="pt-6 d-flex justify-space-between">
       <v-btn
         variant="outlined"
         color="primary"
