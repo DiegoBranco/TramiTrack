@@ -118,51 +118,73 @@
             <h2 class="font-bitter text-h4 font-weight-bold mb-4">
               INFORMACIÓN DE PAGO
             </h2>
-            <div class="info-row">
-              <v-avatar color="primary" size="30">
-                <v-icon size="16" color="white">mdi-account-school</v-icon>
-              </v-avatar>
-              <div>
-                <p class="label">Estudiante</p>
-                <p class="value">{{ fullName }}</p>
-              </div>
-            </div>
+            <v-row>
+              <v-col cols="12" sm="6" class="pb-2">
+                <div class="info-grid-item">
+                  <v-avatar color="primary" size="30">
+                    <v-icon size="16" color="white">mdi-account-school</v-icon>
+                  </v-avatar>
+                  <div>
+                    <p class="label">Estudiante</p>
+                    <p class="value value-link">{{ fullName }}</p>
+                  </div>
+                </div>
+              </v-col>
 
-            <div class="info-row">
-              <v-avatar color="accent" size="30">
-                <v-icon size="16" color="white">mdi-cash</v-icon>
-              </v-avatar>
-              <div>
-                <p class="label">Monto de pago</p>
-                <p class="value">
-                  {{ formatAmount(detalle.datos_formulario?.monto) }}
-                </p>
-              </div>
-            </div>
+              <v-col cols="12" sm="6" class="pb-2">
+                <div class="info-grid-item">
+                  <v-avatar color="accent" size="30">
+                    <v-icon size="16" color="white">mdi-credit-card-outline</v-icon>
+                  </v-avatar>
+                  <div>
+                    <p class="label">Cta. de origen</p>
+                    <p class="value">{{ cuentaOrigen }}</p>
+                  </div>
+                </div>
+              </v-col>
 
-            <div class="info-row">
-              <v-avatar color="secondary" size="30">
-                <v-icon size="16" color="white">mdi-calendar</v-icon>
-              </v-avatar>
-              <div>
-                <p class="label">Fecha de pago</p>
-                <p class="value">
-                  {{ formatDate(detalle.datos_formulario?.fecha_pago) }}
-                </p>
-              </div>
-            </div>
+              <v-col cols="12" sm="6" class="py-2">
+                <div class="info-grid-item">
+                  <v-avatar color="accent" size="30">
+                    <v-icon size="16" color="white">mdi-cash</v-icon>
+                  </v-avatar>
+                  <div>
+                    <p class="label">Monto de pago</p>
+                    <p class="value">
+                      {{ formatAmount(detalle.datos_formulario?.monto) }}
+                    </p>
+                  </div>
+                </div>
+              </v-col>
 
-            <div class="info-row">
-              <v-avatar color="primary" size="30">
-                <v-icon size="16" color="white">mdi-receipt-text</v-icon>
-              </v-avatar>
-              <div>
-                <p class="label">Referencia</p>
-                <p class="value">
-                  {{ detalle.datos_formulario?.referencia_pago || "N/A" }}
-                </p>
-              </div>
-            </div>
+              <v-col cols="12" sm="6" class="py-2">
+                <div class="info-grid-item">
+                  <v-avatar color="secondary" size="30">
+                    <v-icon size="16" color="white">mdi-calendar</v-icon>
+                  </v-avatar>
+                  <div>
+                    <p class="label">Fecha de pago</p>
+                    <p class="value">
+                      {{ formatDate(detalle.datos_formulario?.fecha_pago) }}
+                    </p>
+                  </div>
+                </div>
+              </v-col>
+
+              <v-col cols="12" sm="6" class="pt-2">
+                <div class="info-grid-item">
+                  <v-avatar color="primary" size="30">
+                    <v-icon size="16" color="white">mdi-receipt-text</v-icon>
+                  </v-avatar>
+                  <div>
+                    <p class="label">Referencia</p>
+                    <p class="value">
+                      {{ detalle.datos_formulario?.referencia_pago || "N/A" }}
+                    </p>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
           </v-card>
 
           <v-card class="pa-5 rounded-lg mb-4" elevation="1">
@@ -171,31 +193,18 @@
               block
               color="secondary"
               class="text-none mb-3 btn-text-white"
-              @click="downloadDocumentoFinal"
-              :disabled="!hasDocumentoFinal"
+              @click="downloadDocumento"
+              :disabled="!hasDownloadableDocument"
             >
               Descargar Documentos
             </v-btn>
-            <v-file-input
-              v-model="documentoFinal"
-              accept=".pdf,.png,.jpg,.jpeg"
-              prepend-icon=""
-              prepend-inner-icon="mdi-upload"
-              variant="outlined"
-              density="compact"
-              hide-details
-              label="Subir documento final"
-              class="mb-3"
-            />
             <v-btn
               block
               color="primary"
               class="text-none btn-text-white"
-              @click="uploadDocumento"
-              :loading="uploadingDocumento"
-              :disabled="!documentoFinal"
+              @click="sendNotification"
             >
-              Guardar documento
+              Enviar Notificación
             </v-btn>
           </v-card>
         </v-col>
@@ -239,9 +248,7 @@ const router = useRouter();
 const detalle = ref<TramiteResponse | null>(null);
 const loading = ref(false);
 const saving = ref(false);
-const uploadingDocumento = ref(false);
 const error = ref<string | null>(null);
-const documentoFinal = ref<File | null>(null);
 
 const form = ref({
   observaciones: "",
@@ -274,7 +281,21 @@ const statusConfig = computed(() => {
   return { label, color };
 });
 
-const hasDocumentoFinal = computed(() => !!detalle.value?.documento_final);
+const comprobantePath = computed(() => {
+  const comprobante = detalle.value?.comprobante_id as
+    | { ruta_comprobante?: string }
+    | undefined;
+  return comprobante?.ruta_comprobante || "";
+});
+
+const downloadablePath = computed(
+  () => detalle.value?.documento_final || comprobantePath.value || "",
+);
+
+const hasDownloadableDocument = computed(() => !!downloadablePath.value);
+const cuentaOrigen = computed(
+  () => detalle.value?.datos_formulario?.cuenta_bancaria || "N/A",
+);
 
 const normalizeFilePath = (path: string) => {
   const marker = "/uploads/";
@@ -337,29 +358,16 @@ const saveCambios = async () => {
   }
 };
 
-const uploadDocumento = async () => {
-  if (!tramiteId.value || !documentoFinal.value) return;
-  uploadingDocumento.value = true;
-  try {
-    await solicitudService.uploadDocumentoFinal(
-      tramiteId.value,
-      documentoFinal.value,
-    );
-    documentoFinal.value = null;
-    await loadDetalle();
-  } catch (err) {
-    console.error("Error subiendo documento final:", err);
-    error.value = "No se pudo subir el documento final.";
-  } finally {
-    uploadingDocumento.value = false;
-  }
-};
-
-const downloadDocumentoFinal = () => {
-  if (!detalle.value?.documento_final) return;
-  const path = normalizeFilePath(detalle.value.documento_final);
+const downloadDocumento = () => {
+  if (!downloadablePath.value) return;
+  const path = normalizeFilePath(downloadablePath.value);
   const url = `${import.meta.env.VITE_API_URL || ""}${path}`;
   window.open(url, "_blank");
+};
+
+const sendNotification = () => {
+  // Placeholder de UX alineado al wireframe.
+  console.log("TODO: integrar envío de notificaciones");
 };
 
 watch(
@@ -383,11 +391,10 @@ watch(
   margin-bottom: 2px;
 }
 
-.info-row {
+.info-grid-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 16px;
 }
 
 .label {
@@ -401,6 +408,11 @@ watch(
 .value {
   font-size: 1.2rem;
   color: #6f7285;
+}
+
+.value-link {
+  color: #075e68;
+  text-decoration: underline;
 }
 
 :deep(.btn-text-white .v-btn__content) {
