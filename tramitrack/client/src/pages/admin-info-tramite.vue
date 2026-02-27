@@ -206,6 +206,17 @@
             <div class="d-flex flex-column ga-3 my-auto">
               <v-btn
                 block
+                :color="['completado', 'entregado'].includes(form.estado) ? 'primary' : 'grey-darken-1'"
+                :variant="['completado', 'entregado'].includes(form.estado) ? 'flat' : 'outlined'"
+                :disabled="!['completado', 'entregado'].includes(form.estado)"
+                class="text-none btn-border-bold"
+                :class="{ 'text-white': ['completado', 'entregado'].includes(form.estado) }"
+                @click="generarTramite"
+              >
+                Generar {{ detalle?.tramiteType_id?.nombre || 'Trámite' }}
+              </v-btn>
+              <v-btn
+                block
                 color="primary"
                 variant="outlined"
                 class="text-none btn-border-bold"
@@ -278,6 +289,7 @@ const estadoOptions = [
   { label: "En Proceso", value: "en_proceso" },
   { label: "Completado", value: "completado" },
   { label: "Rechazado", value: "rechazado" },
+  { label: "Entregado", value: "entregado" },
 ];
 
 const tramiteId = computed(() => {
@@ -386,6 +398,15 @@ const downloadDocumento = () => {
 const sendNotification = () => {
   // Placeholder de UX alineado al wireframe.
   console.log("TODO: integrar envío de notificaciones");
+};
+
+const generarTramite = async () => {
+  // TODO: integrar generación del documento del trámite
+  console.log("Generando trámite:", tramiteId.value);
+
+  // Al generar, pasar automáticamente a "entregado" para que el estudiante pueda descargar
+  form.value.estado = "entregado";
+  await saveCambios();
 };
 
 watch(

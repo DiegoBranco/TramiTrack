@@ -22,7 +22,7 @@ export interface SolicitudPayload {
 export interface TramiteResponse {
   _id: string;
   numero_seguimiento: string;
-  estado: "pendiente" | "en_proceso" | "completado" | "rechazado";
+  estado: "pendiente" | "en_proceso" | "completado" | "rechazado" | "entregado";
   fecha_solicitud: string;
   fecha_estimada?: string;
   createdAt: string;
@@ -159,6 +159,7 @@ class SolicitudService {
       en_proceso: "En Proceso",
       completado: "Completado",
       rechazado: "Rechazado",
+      entregado: "Entregado",
     };
     return estados[estado] || estado;
   }
@@ -176,6 +177,8 @@ class SolicitudService {
         return "secondary";
       case "rechazado":
         return "error";
+      case "entregado":
+        return "primary";
       default:
         return "grey";
     }
