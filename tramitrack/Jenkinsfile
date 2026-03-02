@@ -9,6 +9,7 @@ pipeline {
     environment {
         FRONTEND_IMAGE = "tramitrack-frontend"
         BACKEND_IMAGE = "tramitrack-backend"
+        UNIT_TEST_IMAGE = "unit-tests"
         API_TEST_IMAGE = "api-tests"
         E2E_IMAGE = "e2e-tests"
         PERF_IMAGE = "perf-tests"
@@ -71,8 +72,13 @@ pipeline {
         
         
         stage('Unit Tests') {
-        steps {
-            sh 'docker run --rm ${FRONTEND_IMAGE}:build pnpm test -- --watchAll=false'
+            steps {
+                dir('tramitrack') {
+                    sh '''
+                    docker build -f tests/unit/Dockerfile.unit -t ${UNIT_TEST_IMAGE} tests/unit
+                    docker run --rm ${UNIT_TEST_IMAGE}
+                    '''
+                }
             }
         }
         stage('API Tests (Postman/Newman)') {
