@@ -252,7 +252,7 @@ jobs:
                 remote {
                   url('https://github.com/DiegoBranco/TramiTrack.git')
                 }
-                branch('develop')
+                branch('test/jenkins')
               }
             }
             scriptPath('tramitrack/Jenkinsfile')
