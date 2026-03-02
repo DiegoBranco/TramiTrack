@@ -49,8 +49,9 @@ pipeline {
                 dir('tramitrack'){
                 sh '''
                 docker build \
+                -f client/Dockerfile \
                 -t ${FRONTEND_IMAGE}:build \
-                .
+                client
                 '''
                 }
             }
