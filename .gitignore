@@ -1,2 +1,6 @@
 tramitrack/.env
 /uploads/*
+# VS Code
+.vscode/*
+*.code-workspace
+
