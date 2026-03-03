@@ -5,9 +5,12 @@ WORKDIR /tests
 # Copiar todo el contenido de performance/
 COPY . .
 
+# Asegurar directorios de salida con permisos de escritura para el usuario de ejecución
+RUN mkdir -p /tests/results /tests/reports && chmod -R 777 /tests/results /tests/reports
+
 # Copiar y configurar script de entrada
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 # El contenedor ejecutará nuestro script usando el shell (evita problemas con CRLF/shebang)
 ENTRYPOINT ["sh", "/entrypoint.sh"]
