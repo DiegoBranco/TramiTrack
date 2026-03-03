@@ -110,7 +110,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack'){
                         sh '''
-                        docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
+                        docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} .
                         docker run --rm ${E2E_IMAGE}
                         '''
                         }
@@ -131,7 +131,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack'){
                         sh '''
-                        docker build -f tests/performance/dockerfile.performance -t ${PERF_IMAGE} tests/performance
+                        docker build -f tests/performance/Dockerfile.performance -t ${PERF_IMAGE} tests/performance
                         docker run --rm ${PERF_IMAGE}
                         '''
                         }
