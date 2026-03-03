@@ -2,8 +2,8 @@
 const config = {
     testEnvironment: 'node',
 
-  // Dónde buscar los tests
-    testMatch: ['**/tests/unit/**/*.test.js'],
+  // Dónde buscar los tests (en el contexto `tests/unit` los archivos están en la raíz)
+    testMatch: ['**/*.test.js'],
 
   // Configuración de jest-junit
     reporters: [

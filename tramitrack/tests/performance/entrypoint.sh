@@ -14,6 +14,9 @@ echo "=================================================="
 echo " Ejecutando pruebas de rendimiento con JMeter"
 echo "=================================================="
 
+# Asegurar rutas de salida
+mkdir -p /tests/results /tests/reports
+
 # Ejecutar JMeter en modo no gráfico
 # -n: no gráfico
 # -t: archivo de prueba (tomamos el primero encontrado, o podrías parametrizarlo)
@@ -22,8 +25,9 @@ echo "=================================================="
 # -e -o: generar reporte HTML
 
 TEST_PLAN=$(ls /tests/plans/*.jmx | head -1)
-RESULTS_FILE="/tests/results/resultado-$(date +%Y%m%d-%H%M%S).jtl"
-REPORT_DIR="/tests/reports/$(date +%Y%m%d-%H%M%S)"
+RUN_TS=$(date +%Y%m%d-%H%M%S)
+RESULTS_FILE="/tests/results/resultado-${RUN_TS}.jtl"
+REPORT_DIR="/tests/reports/${RUN_TS}"
 
 echo "Plan de pruebas: $TEST_PLAN"
 echo "Resultados: $RESULTS_FILE"
