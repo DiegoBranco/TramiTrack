@@ -9,6 +9,7 @@ pipeline {
     environment {
         FRONTEND_IMAGE = "tramitrack-frontend"
         BACKEND_IMAGE = "tramitrack-backend"
+        UNIT_TEST_IMAGE = "unit-tests"
         API_TEST_IMAGE = "api-tests"
         E2E_IMAGE = "e2e-tests"
         PERF_IMAGE = "perf-tests"
@@ -49,8 +50,9 @@ pipeline {
                 dir('tramitrack'){
                 sh '''
                 docker build \
+                -f client/Dockerfile \
                 -t ${FRONTEND_IMAGE}:build \
-                .
+                client
                 '''
                 }
             }
@@ -70,18 +72,25 @@ pipeline {
         
         
         stage('Unit Tests') {
-        steps {
-            sh 'docker run --rm ${FRONTEND_IMAGE}:build pnpm test -- --watchAll=false'
+            steps {
+                dir('tramitrack') {
+                    sh '''
+                    docker build -f tests/unit/Dockerfile.unit -t ${UNIT_TEST_IMAGE} tests/unit
+                    docker run --rm ${UNIT_TEST_IMAGE}
+                    '''
+                }
             }
         }
         stage('API Tests (Postman/Newman)') {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                        dir('tramitrack'){
                         sh '''
                         docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
                         docker run --rm ${API_TEST_IMAGE} newman run coleccion.postman_collection.json -e entorno.postman_environment.json
                         '''
+                        }
                     }
                 }
             }
@@ -99,10 +108,22 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                        dir('tramitrack'){
                         sh '''
-                        docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
-                        docker run --rm ${E2E_IMAGE}
+                        cleanup() {
+                            docker rm -f frontend-e2e >/dev/null 2>&1 || true
+                            docker network rm e2e-net >/dev/null 2>&1 || true
+                        }
+
+                        cleanup
+                        trap cleanup EXIT
+
+                        docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} .
+                        docker network create e2e-net
+                        docker run -d --rm --name frontend-e2e --network e2e-net ${FRONTEND_IMAGE}:build pnpm dev --host 0.0.0.0 --port 3000
+                        docker run --rm --network e2e-net -e CYPRESS_baseUrl=http://frontend-e2e:3000 ${E2E_IMAGE}
                         '''
+                        }
                     }
                 }
             }
@@ -111,17 +132,19 @@ pipeline {
                     echo 'AVISO: No se ejecutaron pruebas E2E o el contenedor de Cypress fallo'
                     }
                 }
-        }
+        } 
         
         
         stage('Performance Tests') {
         steps {
             script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                        dir('tramitrack'){
                         sh '''
-                        docker build -f tests/performance/dockerfile.performance -t ${PERF_IMAGE} tests/performance
+                        docker build -f tests/performance/Dockerfile.performance -t ${PERF_IMAGE} tests/performance
                         docker run --rm ${PERF_IMAGE}
                         '''
+                        }
                 }
             }
         }
@@ -131,7 +154,7 @@ pipeline {
                 }
             }
         }
-        */
+        
     }
     post {
     success {

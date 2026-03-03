@@ -1,6 +1,6 @@
-describe('Prueba de carga', () => {
-  it('Debería cargar la página principal', () => {
-    cy.visit('/')
-    cy.contains('Vuetify')
+describe('Prueba de login', () => {
+  it('Página de login accesible (smoke)', () => {
+    cy.visit('/login')
+    cy.contains('Iniciar Sesión').should('be.visible')
   })
 })
