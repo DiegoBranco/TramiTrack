@@ -156,7 +156,7 @@ pipeline {
                     RETRIES=30
                     COUNT=0
                     echo "Waiting for express-server to become healthy"
-                    until docker exec express-server-2-1 sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
+                    until docker exec express-server-1 sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
                         COUNT=$((COUNT+1))
                         if [ "$COUNT" -ge "$RETRIES" ]; then
                             echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
