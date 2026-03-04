@@ -141,7 +141,8 @@ pipeline {
                     echo "MongoDB ready"
 
                     # 3. Arrancar el backend
-                    docker run -d --rm \
+                    # Run backend without --rm so we can inspect logs if it exits
+                    docker run -d \
                     --name "${API_CONT}" \
                     --label "${CI_LABEL}" \
                     --network "${API_NET}" \
@@ -156,21 +157,31 @@ pipeline {
                     RETRIES=30
                     COUNT=0
                     echo "Waiting for express-server to become healthy"
-                    until docker exec "${API_CONT}" sh -c 'wget -q -T 2 -O /dev/null http://127.0.0.1:3001/'; do
-                        COUNT=$((COUNT+1))
-                        if [ "$COUNT" -ge "$RETRIES" ]; then
-                            echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
-                            # Try to print logs by container id if present, otherwise by container name
-                            if [ -n "$SERVICE_CID" ]; then
-                                docker logs "$SERVICE_CID" || true
-                            else
-                                docker logs "${API_CONT}" || true
-                            fi
+                    while [ "$COUNT" -lt "$RETRIES" ]; do
+                        # Check if container is still present
+                        CONT_EXISTS=$(docker ps -q -f name="^${API_CONT}$" || true)
+                        if [ -z "${CONT_EXISTS}" ]; then
+                            echo "ERROR: ${API_CONT} container is not running (it may have exited). Dumping logs:"
+                            docker logs "${API_CONT}" || true
                             docker logs "${MONGO_CONT}" || true
                             exit 1
                         fi
+
+                        # Try to hit the HTTP endpoint from inside the container
+                        if docker exec "${API_CONT}" sh -c 'wget -q -T 2 -O /dev/null http://127.0.0.1:3001/' >/dev/null 2>&1; then
+                            echo "express-server is responding"
+                            break
+                        fi
+
+                        COUNT=$((COUNT+1))
                         sleep 2
                     done
+                    if [ "$COUNT" -ge "$RETRIES" ]; then
+                        echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
+                        docker logs "${API_CONT}" || true
+                        docker logs "${MONGO_CONT}" || true
+                        exit 1
+                    fi
 
                     # 5. Ejecutar pruebas Newman
                     API_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${API_CONT}")
