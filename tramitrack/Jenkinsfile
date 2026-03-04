@@ -91,9 +91,9 @@ pipeline {
                     set -e
 
                     API_NET="api-tests-net-${BUILD_NUMBER:-local}"
-                    # Usar nombres fijos de contenedor para evitar problemas con sufijos
-                    MONGO_CONT="tramitrack-mongo-1"
-                    API_CONT="tramitrack-express-server-1"
+                    RUN_SUFFIX="${BUILD_NUMBER:-local}-${EXECUTOR_NUMBER:-0}"
+                    MONGO_CONT="mongo-${RUN_SUFFIX}"
+                    API_CONT="express-server-${RUN_SUFFIX}"
                     CI_LABEL="ci.tramitrack.api-tests=true"
 
                     OLD_CONTAINERS=$(docker ps -aq --filter "label=${CI_LABEL}" || true)
@@ -129,7 +129,7 @@ pipeline {
                     echo "Waiting for MongoDB to become ready..."
                     MONGO_RETRIES=15
                     MONGO_COUNT=0
-                    until docker exec "${MONGO_CONT}" mongo --eval "db.runCommand(\'ping\').ok" --quiet 2>/dev/null; do
+                    until docker exec tramitrack-mongo-1 mongo --eval "db.runCommand(\'ping\').ok" --quiet 2>/dev/null; do
                         MONGO_COUNT=$((MONGO_COUNT+1))
                         if [ "$MONGO_COUNT" -ge "$MONGO_RETRIES" ]; then
                             echo "ERROR: MongoDB did not become ready"
