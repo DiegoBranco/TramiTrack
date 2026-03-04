@@ -91,9 +91,23 @@ pipeline {
                         set -e
 
                         API_NET="api-tests-net-${BUILD_NUMBER:-local}"
+                        RUN_SUFFIX="${BUILD_NUMBER:-local}-${EXECUTOR_NUMBER:-0}"
+                        MONGO_CONT="mongo-${RUN_SUFFIX}"
+                        API_CONT="express-server-${RUN_SUFFIX}"
+                        CI_LABEL="ci.tramitrack.api-tests=true"
+
+                        OLD_CONTAINERS=$(docker ps -aq --filter "label=${CI_LABEL}" || true)
+                        if [ -n "${OLD_CONTAINERS}" ]; then
+                            docker rm -f ${OLD_CONTAINERS} >/dev/null 2>&1 || true
+                        fi
+
+                        OLD_NETWORKS=$(docker network ls -q --filter "label=${CI_LABEL}" || true)
+                        if [ -n "${OLD_NETWORKS}" ]; then
+                            docker network rm ${OLD_NETWORKS} >/dev/null 2>&1 || true
+                        fi
 
                         cleanup() {
-                            docker rm -f express-server mongo >/dev/null 2>&1 || true
+                            docker rm -f "${API_CONT}" "${MONGO_CONT}" >/dev/null 2>&1 || true
                             docker network rm "${API_NET}" >/dev/null 2>&1 || true
                         }
 
@@ -101,21 +115,25 @@ pipeline {
 
                         docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
 
-                        docker network create "${API_NET}" >/dev/null 2>&1 || true
+                        docker network create --label "${CI_LABEL}" "${API_NET}" >/dev/null 2>&1 || true
 
                         docker run -d --rm \
-                        --name mongo \
+                        --name "${MONGO_CONT}" \
+                        --label "${CI_LABEL}" \
                         --network "${API_NET}" \
+                        --network-alias mongo \
                         mongo:4.4
 
                         docker run -d --rm \
-                        --name express-server \
+                        --name "${API_CONT}" \
+                        --label "${CI_LABEL}" \
                         --network "${API_NET}" \
+                        --network-alias express-server \
                         -e SERVER_PORT=3001 \
                         -e MONGO_URI=mongodb://mongo:27017/tramitrack \
                         ${BACKEND_IMAGE}:latest
 
-                        SERVICE_CID=$(docker ps -q -f name=^express-server$)
+                        SERVICE_CID=$(docker ps -q -f name="^${API_CONT}$")
 
                         # Wait for express-server to respond HTTP 200 on / (retry loop)
                         RETRIES=45
@@ -127,7 +145,7 @@ pipeline {
                                 echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
                                 # Dump container logs for debugging
                                 docker logs "$SERVICE_CID" || true
-                                docker logs mongo || true
+                                docker logs "${MONGO_CONT}" || true
                                 exit 1
                             fi
                             sleep 2
