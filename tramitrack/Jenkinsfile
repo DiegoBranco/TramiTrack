@@ -90,35 +90,50 @@ pipeline {
                         sh '''
                         set -e
 
+                        API_NET="api-tests-net-${BUILD_NUMBER:-local}"
+
                         cleanup() {
-                            docker compose -f docker-compose.yml down -v >/dev/null 2>&1 || true
+                            docker rm -f express-server mongo >/dev/null 2>&1 || true
+                            docker network rm "${API_NET}" >/dev/null 2>&1 || true
                         }
 
                         trap cleanup EXIT
 
                         docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
 
-                        docker compose -f docker-compose.yml up -d mongo express-server
+                        docker network create "${API_NET}" >/dev/null 2>&1 || true
 
-                        SERVICE_CID=$(docker compose -f docker-compose.yml ps -q express-server)
-                        NETWORK_NAME=$(docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}' "$SERVICE_CID")
+                        docker run -d --rm \
+                        --name mongo \
+                        --network "${API_NET}" \
+                        mongo:4.4
+
+                        docker run -d --rm \
+                        --name express-server \
+                        --network "${API_NET}" \
+                        -e SERVER_PORT=3001 \
+                        -e MONGO_URI=mongodb://mongo:27017/tramitrack \
+                        ${BACKEND_IMAGE}:latest
+
+                        SERVICE_CID=$(docker ps -q -f name=^express-server$)
 
                         # Wait for express-server to respond HTTP 200 on / (retry loop)
-                        RETRIES=30
+                        RETRIES=45
                         COUNT=0
-                        echo "Waiting for express-server to become healthy on network: ${NETWORK_NAME}"
-                        until docker run --rm --network "${NETWORK_NAME}" curlimages/curl:latest -sS --max-time 3 -o /dev/null -w "%{http_code}" http://express-server:3001/ | grep -q '^200$'; do
+                        echo "Waiting for express-server to become healthy on network: ${API_NET}"
+                        until docker run --rm --network "${API_NET}" curlimages/curl:latest -sS --max-time 3 -o /dev/null -w "%{http_code}" http://express-server:3001/ | grep -q '^200$'; do
                             COUNT=$((COUNT+1))
                             if [ "$COUNT" -ge "$RETRIES" ]; then
                                 echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
                                 # Dump container logs for debugging
                                 docker logs "$SERVICE_CID" || true
+                                docker logs mongo || true
                                 exit 1
                             fi
                             sleep 2
                         done
 
-                        docker run --rm --network "${NETWORK_NAME}" ${API_TEST_IMAGE} run coleccion.postman_collection.json -e entorno.postman_environment.json
+                        docker run --rm --network "${API_NET}" ${API_TEST_IMAGE} run coleccion.postman_collection.json -e entorno.postman_environment.json
                         '''
                         }
                     }
