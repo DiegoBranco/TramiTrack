@@ -91,9 +91,9 @@ pipeline {
                     set -e
 
                     API_NET="api-tests-net-${BUILD_NUMBER:-local}"
-                    RUN_SUFFIX="${BUILD_NUMBER:-local}-${EXECUTOR_NUMBER:-0}"
-                    MONGO_CONT="mongo-${RUN_SUFFIX}"
-                    API_CONT="express-server-${RUN_SUFFIX}"
+                    # Usar nombres fijos de contenedor para evitar problemas con sufijos
+                    MONGO_CONT="tramitrack-mongo-1"
+                    API_CONT="tramitrack-express-server-1"
                     CI_LABEL="ci.tramitrack.api-tests=true"
 
                     OLD_CONTAINERS=$(docker ps -aq --filter "label=${CI_LABEL}" || true)
