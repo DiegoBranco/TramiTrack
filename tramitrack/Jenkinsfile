@@ -175,16 +175,6 @@ pipeline {
                     -e entorno.postman_environment.json \
                     --env-var "url=http://${API_IP}:3001"
                     '''
-                }
-            }
-        }
-    }
-    post {
-        unstable {
-            echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
-        }
-    }
-}
                         }
                     }
                 }
