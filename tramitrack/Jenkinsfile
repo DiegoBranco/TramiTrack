@@ -135,11 +135,11 @@ pipeline {
 
                         SERVICE_CID=$(docker ps -q -f name="^${API_CONT}$")
 
-                        # Wait for express-server to respond HTTP 200 on / (retry loop)
-                        RETRIES=45
+                        # Wait for express-server to respond HTTP 200 on / (retry loop without Docker DNS)
+                        RETRIES=30
                         COUNT=0
-                        echo "Waiting for express-server to become healthy on network: ${API_NET}"
-                        until docker run --rm --network "${API_NET}" curlimages/curl:latest -sS --max-time 3 -o /dev/null -w "%{http_code}" http://express-server:3001/ | grep -q '^200$'; do
+                        echo "Waiting for express-server to become healthy"
+                        until docker exec "${API_CONT}" sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
                             COUNT=$((COUNT+1))
                             if [ "$COUNT" -ge "$RETRIES" ]; then
                                 echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
@@ -151,7 +151,9 @@ pipeline {
                             sleep 2
                         done
 
-                        docker run --rm --network "${API_NET}" ${API_TEST_IMAGE} run coleccion.postman_collection.json -e entorno.postman_environment.json
+                        API_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${API_CONT}")
+
+                        docker run --rm --network "${API_NET}" ${API_TEST_IMAGE} run coleccion.postman_collection.json -e entorno.postman_environment.json --env-var "url=http://${API_IP}:3001"
                         '''
                         }
                     }
