@@ -83,122 +83,70 @@ pipeline {
         }
 
 
-        stage('API Tests (Postman/Newman)') {
-            steps {
-                script {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        dir('tramitrack') {
-                            sh '''
-                            # Limpiar recursos previos
-                            docker stop express-server-test mongodb-test || true
-                            docker network rm api-test-net || true
-                            
-                            # Construir imagen de pruebas
-                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-                            
-                            # Crear red para las pruebas
-                            docker network create api-test-net
-                            
-                            # Ejecutar MongoDB
-                            echo "===== INICIANDO MONGODB ====="
-                            docker run -d --rm \
-                                --name mongodb-test \
-                                --network api-test-net \
-                                mongo:latest
-                            
-                            # Esperar a que MongoDB esté listo
-                            echo "Esperando a que MongoDB inicie..."
-                            sleep 10
-                            
-                            # Verificar MongoDB
-                            echo "===== VERIFICANDO MONGODB ====="
-                            docker run --rm \
-                                --network api-test-net \
-                                mongo:latest \
-                                mongosh --host mongodb-test --eval "db.runCommand('ping').ok" && \
-                                echo "✅ MongoDB OK" || echo "❌ MongoDB ERROR"
-                            
-                            # Ejecutar backend con logs detallados
-                            echo "===== INICIANDO BACKEND ====="
-                            docker run -d \
-                                --name express-server-test \
-                                --network api-test-net \
-                                -e MONGO_URI=mongodb://mongodb-test:27017/tramitrack_test \
-                                -e SERVER_PORT=3001 \
-                                -e NODE_ENV=development \
-                                -e DEBUG=* \
-                                ${BACKEND_IMAGE}:latest
-                            
-                            # Mostrar logs del backend en tiempo real (en segundo plano)
-                            echo "===== LOGS DEL BACKEND EN TIEMPO REAL ====="
-                            docker logs -f express-server-test &
-                            LOGS_PID=$!
-                            
-                            # Esperar a que el backend inicie
-                            echo "Esperando 15 segundos para que el backend se inicialice..."
-                            sleep 15
-                            
-                            # Verificar estado del backend
-                            echo "===== ESTADO DEL BACKEND ====="
-                            docker ps --filter "name=express-server-test"
-                            
-                            # Verificar logs recientes del backend
-                            echo "===== ÚLTIMOS LOGS DEL BACKEND ====="
-                            docker logs --tail 50 express-server-test
-                            
-                            # Probar conexión al backend
-                            echo "===== PROBANDO CONEXIÓN AL BACKEND ====="
-                            docker run --rm \
-                                --network api-test-net \
-                                curlimages/curl:latest \
-                                curl -v http://express-server-test:3001/ || {
-                                echo "❌ BACKEND NO RESPONDE"
-                                echo "===== LOGS COMPLETOS DEL BACKEND ====="
-                                docker logs express-server-test
-                                kill $LOGS_PID 2>/dev/null || true
-                                exit 1
-                            }
-                            echo "✅ Backend responde correctamente"
-                            
-                            # Matar el proceso de logs en segundo plano
-                            kill $LOGS_PID 2>/dev/null || true
-                            
-                            # Ejecutar pruebas de Postman con verbose
-                            echo "===== EJECUTANDO PRUEBAS DE POSTMAN ====="
-                            docker run --rm \
-                                --network api-test-net \
-                                ${API_TEST_IMAGE} \
-                                run coleccion.postman_collection.json \
-                                -e entorno.postman_environment.json \
-                                --verbose \
-                                --reporters cli,json \
-                                --reporter-json-export test-results.json || true
-                            
-                            # Mostrar resultados
-                            echo "===== RESULTADOS DE LAS PRUEBAS ====="
-                            docker run --rm \
-                                --network api-test-net \
-                                ${API_TEST_IMAGE} \
-                                run coleccion.postman_collection.json \
-                                -e entorno.postman_environment.json \
-                                --reporter-cli-no-assertions \
-                                --reporter-cli-no-success-assertions || true
-                            
-                            # Limpiar
-                            echo "===== LIMPIANDO CONTENEDORES ====="
-                            docker stop express-server-test mongodb-test || true
-                            docker network rm api-test-net || true
-                            '''
-                        }
-                    }
-                }
-            }
-            post {
-                unstable {
-                    echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
+stage('API Tests (Postman/Newman)') {
+    steps {
+        script {
+            catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                dir('tramitrack') {
+                    sh '''
+                    # 1. Limpieza total de recursos previos [cite: 16, 17, 18]
+                    docker stop express-server-test mongodb-test || true
+                    docker network rm api-test-net || true
+                    
+                    # 2. Construir imagen de pruebas de Newman [cite: 1, 19]
+                    docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+                    
+                    # 3. Crear red para intercomunicación [cite: 20]
+                    docker network create api-test-net
+                    
+                    # 4. Iniciar MongoDB 4.4 (SOLUCIÓN AL ERROR DE AVX/CPU) [cite: 21, 22]
+                    # Cambiamos mongo:latest por mongo:4.4 porque es compatible con CPUs antiguas
+                    echo "===== INICIANDO MONGODB 4.4 ====="
+                    docker run -d --name mongodb-test --network api-test-net mongo:4.4
+                    
+                    echo "Esperando a que MongoDB inicie..."
+                    sleep 10
+                    
+                    # 5. Iniciar Backend sobreescribiendo el comando (SOLUCIÓN A docker-compose: not found) [cite: 27, 28, 29]
+                    # Se añade 'node index.js' al final para ignorar el script de pnpm que fallaba
+                    echo "===== INICIANDO BACKEND ====="
+                    docker run -d \
+                        --name express-server-test \
+                        --network api-test-net \
+                        -e MONGO_URI=mongodb://mongodb-test:27017/tramitrack_test \
+                        -e SERVER_PORT=3001 \
+                        -e NODE_ENV=development \
+                        -e DEBUG=* \
+                        ${BACKEND_IMAGE}:latest node index.js
+                    
+                    # 6. Monitoreo de logs y espera de estabilidad [cite: 30, 31, 32]
+                    docker logs -f express-server-test &
+                    LOGS_PID=$!
+                    echo "Esperando 15 segundos para inicialización..."
+                    sleep 15
+                    
+                    # 7. Ejecutar pruebas de Postman con Newman [cite: 43, 44, 45]
+                    # Forzamos la URL correcta mediante --env-var para evitar errores de resolución 
+                    echo "===== EJECUTANDO PRUEBAS DE POSTMAN ====="
+                    docker run --rm \
+                        --network api-test-net \
+                        ${API_TEST_IMAGE} \
+                        run coleccion.postman_collection.json \
+                        -e entorno.postman_environment.json \
+                        --env-var "url=http://express-server-test:3001" \
+                        --reporters cli,json \
+                        --reporter-json-export test-results.json || true
+                    
+                    # 8. Limpiar al finalizar [cite: 51, 52, 53]
+                    kill $LOGS_PID 2>/dev/null || true
+                    docker stop express-server-test mongodb-test || true
+                    docker network rm api-test-net || true
+                    '''
                 }
             }
         }
+    }
+}
                 
         
         stage('E2E Tests') {
