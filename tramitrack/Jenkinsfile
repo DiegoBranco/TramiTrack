@@ -81,37 +81,50 @@ pipeline {
                 }
             }
         }
+
+        
         stage('API Tests (Postman/Newman)') {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack') {
                             sh '''
+                            # Limpiar recursos previos
+                            docker stop express-server-test || true
+                            docker network rm api-test-net || true
+                            
                             # Construir imagen de pruebas
                             docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
                             
-                            # Ejecutar backend en background
+                            # Crear red para las pruebas
+                            docker network create api-test-net
+                            
+                            # Ejecutar backend en la red (sin mapear puertos al host)
                             docker run -d --rm \
                                 --name express-server-test \
-                                -p 3001:3001 \
+                                --network api-test-net \
                                 ${BACKEND_IMAGE}:latest
                             
                             # Esperar a que el backend esté listo
                             echo "Esperando a que el backend inicie..."
                             sleep 20
                             
-                            # Probar que el backend esté accesible
-                            curl --retry 5 --retry-delay 2 --retry-connrefused http://localhost:3001/
-                            
-                            # Ejecutar pruebas (usando localhost ahora)
+                            # Probar que el backend esté accesible dentro de la red
                             docker run --rm \
-                                --network host \
+                                --network api-test-net \
+                                curlimages/curl:latest \
+                                curl --retry 5 --retry-delay 2 --retry-connrefused http://express-server-test:3001/
+                            
+                            # Ejecutar pruebas en la misma red
+                            docker run --rm \
+                                --network api-test-net \
                                 ${API_TEST_IMAGE} \
                                 run coleccion.postman_collection.json \
                                 -e entorno.postman_environment.json || true
                             
                             # Limpiar
                             docker stop express-server-test || true
+                            docker network rm api-test-net || true
                             '''
                         }
                     }
