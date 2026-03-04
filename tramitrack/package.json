@@ -1,8 +1,11 @@
 {
     "scripts": {
-    "dev": "docker-compose up",
-    "dev:jenkins": "docker-compose -f docker-compose.yml -f docker-compose.jenkins.yml up",
-    "down": "docker-compose down",
-    "logs": "docker-compose logs -f"
+        "dev": "docker-compose up",
+        "dev:jenkins": "docker-compose -f docker-compose.yml -f docker-compose.jenkins.yml up",
+        "down": "docker-compose down",
+        "logs": "docker-compose logs -f"
+    },
+    "devDependencies": {
+        "jest": "^30.2.0"
     }
 }
