@@ -126,6 +126,31 @@ exports.getAll = async (req, res) => {
 exports.updateEstado = async (req, res) => {
   try {
     const { estado, observaciones } = req.body;
+    const actual = await Solicitud.findById(req.params.id);
+    if (!actual){
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+    if (estado && !["pendiente", "en_proceso", "completado", "rechazado", "entregado"].includes(estado)) {
+      return res.status(400).json({ message: "Estado inválido" });
+    }
+    //revisamos que el cambio de estado sea lógico (ej: no pasar de pendiente a completado sin pasar por en_proceso)
+    switch (actual.estado) {
+      case "pendiente":
+        if(estado !== "en_proceso" ){
+          return res.status(400).json({ message: "Solo se puede pasar de pendiente a en_proceso" });
+        }          
+        break;
+      case "en_proceso":
+        if(estado !== "completado" && estado !== "rechazado"){
+          return res.status(400).json({ message: "Solo se puede pasar de en_proceso a completado o rechazado" });
+        }
+        break;
+    
+      default:
+        return res.status(400).json({ message: `No se puede cambiar el estado desde ${actual.estado}` });
+        break;
+    }
+    
     const solicitud = await Solicitud.findByIdAndUpdate(
       req.params.id,
       { estado, observaciones },

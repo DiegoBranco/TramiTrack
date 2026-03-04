@@ -1,18 +1,18 @@
 {
   "info": {
-    "name": "TramiTrack_CI",
+    "name": "TramiTrack_CI_Suite",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Test Root Endpoint",
+      "name": "0. Smoke Test - Root Endpoint",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
-              "pm.test('Check message content', function () { pm.expect(pm.response.json().message).to.contains('Hello from Express'); });"
+              "pm.test('Servidor Online', () => pm.response.to.have.status(200));",
+              "pm.test('Mensaje correcto', () => pm.expect(pm.response.json().message).to.contains('Hello from Express Server!'));"
             ],
             "type": "text/javascript"
           }
@@ -20,8 +20,142 @@
       ],
       "request": {
         "method": "GET",
-        "url": { "raw": "{{url}}/" }
+        "header": [],
+        "url": {
+          "raw": "{{url}}/",
+          "host": ["{{url}}"],
+          "path": [""]
+        }
       }
+    },
+    {
+      "name": "1. Setup - Obtener Usuario del Seed",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const users = pm.response.json();",
+              "const user = users.find(u => u.correo === 'maximilianoc@gmail.com');",
+              "pm.collectionVariables.set('userId', user._id);",
+              "pm.test('Usuario Maximiliano encontrado', () => pm.expect(user).to.be.ok);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/users",
+          "host": ["{{url}}"],
+          "path": ["api", "users"]
+        }
+      }
+    },
+    {
+      "name": "2. Setup - Obtener Tipo de Trámite",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const tramites = pm.response.json();",
+              "// Buscamos el trámite creado por el seed",
+              "const tramite = tramites.find(t => t.nombre === 'Constancia de Estudios');",
+              "pm.collectionVariables.set('tramiteId', tramite._id);",
+              "pm.test('Trámite de Constancia encontrado', () => pm.expect(tramite).to.be.ok);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/tramite-types",
+          "host": ["{{url}}"],
+          "path": ["api", "tramite-types"]
+        }
+      }
+    },
+    {
+      "name": "3. Crear Solicitud Nueva",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Solicitud creada', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.collectionVariables.set('solicitudId', res._id);",
+              "pm.test('Estado inicial es pendiente', () => pm.expect(res.estado).to.eql('pendiente'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/solicitudes",
+          "host": ["{{url}}"],
+          "path": ["api", "solicitudes"]
+        }
+      }
+    },
+    {
+      "name": "4. Admin - Cambiar Estado a Entregado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Cambio de estado exitoso', () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test('Estado final es entregado', () => pm.expect(res.estado).to.eql('entregado'));",
+              "pm.test('Validación de número de seguimiento', () => {\n    pm.expect(res.numero_seguimiento).to.match(/^TRM-\\d{6}$/);\n});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": \"entregado\",\n  \"observaciones\": \"Trámite procesado automáticamente por el sistema de CI/CD\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/solicitudes/{{solicitudId}}/estado",
+          "host": ["{{url}}"],
+          "path": ["api", "solicitudes", "{{solicitudId}}", "estado"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://express-server:3001"
     }
   ]
 }
