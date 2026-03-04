@@ -156,11 +156,16 @@ pipeline {
                     RETRIES=30
                     COUNT=0
                     echo "Waiting for express-server to become healthy"
-                    until docker exec tramitrack-express-server-1 sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
+                    until docker exec "${API_CONT}" sh -c 'wget -q -T 2 -O /dev/null http://127.0.0.1:3001/'; do
                         COUNT=$((COUNT+1))
                         if [ "$COUNT" -ge "$RETRIES" ]; then
                             echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
-                            docker logs "$SERVICE_CID" || true
+                            # Try to print logs by container id if present, otherwise by container name
+                            if [ -n "$SERVICE_CID" ]; then
+                                docker logs "$SERVICE_CID" || true
+                            else
+                                docker logs "${API_CONT}" || true
+                            fi
                             docker logs "${MONGO_CONT}" || true
                             exit 1
                         fi
