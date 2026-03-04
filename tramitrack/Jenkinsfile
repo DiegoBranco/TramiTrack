@@ -35,11 +35,13 @@ pipeline {
                 // Build backend from the `server` folder (Dockerfile uses default name)
                 dir('tramitrack'){
                     sh '''
-                    docker build \
-                    -f server/Dockerfile \
-                    -t ${BACKEND_IMAGE}:latest \
-                    .
-                    '''
+                        # Build backend using the server folder as build context so
+                        # the server/package.json is used (avoid copying root package.json)
+                        docker build \
+                        -f server/Dockerfile \
+                        -t ${BACKEND_IMAGE}:latest \
+                        server
+                        '''
                 }
 
             }
