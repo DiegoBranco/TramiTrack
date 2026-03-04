@@ -87,8 +87,7 @@ pipeline {
         stage('API Tests (Postman/Newman)') {
     steps {
         script {
-            catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                dir('tramitrack'){
+            dir('tramitrack'){
                     sh '''
                     set -e
 
@@ -194,11 +193,10 @@ pipeline {
                     --env-var "url=http://${API_IP}:3001"
                     '''
                         }
-                    }
                 }
             }
             post {
-                unstable {
+                failure {
                     echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
                     }
             }
