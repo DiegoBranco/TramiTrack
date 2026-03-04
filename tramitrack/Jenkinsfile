@@ -152,13 +152,13 @@ pipeline {
                                 --network api-test-net \
                                 curlimages/curl:latest \
                                 curl -v http://express-server-test:3001/ || {
-                                echo "BACKEND NO RESPONDE"
+                                echo "❌ BACKEND NO RESPONDE"
                                 echo "===== LOGS COMPLETOS DEL BACKEND ====="
                                 docker logs express-server-test
                                 kill $LOGS_PID 2>/dev/null || true
                                 exit 1
                             }
-                            echo " Backend responde correctamente"
+                            echo "✅ Backend responde correctamente"
                             
                             # Matar el proceso de logs en segundo plano
                             kill $LOGS_PID 2>/dev/null || true
@@ -198,17 +198,8 @@ pipeline {
                     echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
                 }
             }
-            post {
-                always {
-                    script {
-                        // Asegurarse de matar cualquier proceso de logs que haya quedado
-                        sh 'pkill -f "docker logs -f express-server-test" || true'
-                    }
-                }
-            }
         }
-        
-        
+                
         
         stage('E2E Tests') {
             steps {
