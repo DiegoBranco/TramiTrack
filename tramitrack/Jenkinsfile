@@ -83,78 +83,108 @@ pipeline {
         }
         */
         stage('API Tests (Postman/Newman)') {
-            steps {
-                script {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        dir('tramitrack'){
-                        sh '''
-                        set -e
+    steps {
+        script {
+            catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                dir('tramitrack'){
+                    sh '''
+                    set -e
 
-                        API_NET="api-tests-net-${BUILD_NUMBER:-local}"
-                        RUN_SUFFIX="${BUILD_NUMBER:-local}-${EXECUTOR_NUMBER:-0}"
-                        MONGO_CONT="mongo-${RUN_SUFFIX}"
-                        API_CONT="express-server-${RUN_SUFFIX}"
-                        CI_LABEL="ci.tramitrack.api-tests=true"
+                    API_NET="api-tests-net-${BUILD_NUMBER:-local}"
+                    RUN_SUFFIX="${BUILD_NUMBER:-local}-${EXECUTOR_NUMBER:-0}"
+                    MONGO_CONT="mongo-${RUN_SUFFIX}"
+                    API_CONT="express-server-${RUN_SUFFIX}"
+                    CI_LABEL="ci.tramitrack.api-tests=true"
 
-                        OLD_CONTAINERS=$(docker ps -aq --filter "label=${CI_LABEL}" || true)
-                        if [ -n "${OLD_CONTAINERS}" ]; then
-                            docker rm -f ${OLD_CONTAINERS} >/dev/null 2>&1 || true
+                    OLD_CONTAINERS=$(docker ps -aq --filter "label=${CI_LABEL}" || true)
+                    if [ -n "${OLD_CONTAINERS}" ]; then
+                        docker rm -f ${OLD_CONTAINERS} >/dev/null 2>&1 || true
+                    fi
+
+                    OLD_NETWORKS=$(docker network ls -q --filter "label=${CI_LABEL}" || true)
+                    if [ -n "${OLD_NETWORKS}" ]; then
+                        docker network rm ${OLD_NETWORKS} >/dev/null 2>&1 || true
+                    fi
+
+                    cleanup() {
+                        docker rm -f "${API_CONT}" "${MONGO_CONT}" >/dev/null 2>&1 || true
+                        docker network rm "${API_NET}" >/dev/null 2>&1 || true
+                    }
+
+                    trap cleanup EXIT
+
+                    docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+
+                    docker network create --label "${CI_LABEL}" "${API_NET}" >/dev/null 2>&1 || true
+
+                    # 1. Arrancar Mongo
+                    docker run -d --rm \
+                    --name "${MONGO_CONT}" \
+                    --label "${CI_LABEL}" \
+                    --network "${API_NET}" \
+                    --network-alias mongo \
+                    mongo:4.4
+
+                    # 2. Esperar a que Mongo esté listo antes de arrancar el backend
+                    echo "Waiting for MongoDB to become ready..."
+                    MONGO_RETRIES=15
+                    MONGO_COUNT=0
+                    until docker exec "${MONGO_CONT}" mongo --eval "db.runCommand(\'ping\').ok" --quiet 2>/dev/null; do
+                        MONGO_COUNT=$((MONGO_COUNT+1))
+                        if [ "$MONGO_COUNT" -ge "$MONGO_RETRIES" ]; then
+                            echo "ERROR: MongoDB did not become ready"
+                            docker logs "${MONGO_CONT}" || true
+                            exit 1
                         fi
+                        sleep 2
+                    done
+                    echo "MongoDB ready"
 
-                        OLD_NETWORKS=$(docker network ls -q --filter "label=${CI_LABEL}" || true)
-                        if [ -n "${OLD_NETWORKS}" ]; then
-                            docker network rm ${OLD_NETWORKS} >/dev/null 2>&1 || true
+                    # 3. Arrancar el backend
+                    docker run -d --rm \
+                    --name "${API_CONT}" \
+                    --label "${CI_LABEL}" \
+                    --network "${API_NET}" \
+                    --network-alias express-server \
+                    -e SERVER_PORT=3001 \
+                    -e MONGO_URI=mongodb://mongo:27017/tramitrack \
+                    ${BACKEND_IMAGE}:latest
+
+                    SERVICE_CID=$(docker ps -q -f name="^${API_CONT}$")
+
+                    # 4. Esperar a que el backend responda HTTP 200
+                    RETRIES=30
+                    COUNT=0
+                    echo "Waiting for express-server to become healthy"
+                    until docker exec "${API_CONT}" sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
+                        COUNT=$((COUNT+1))
+                        if [ "$COUNT" -ge "$RETRIES" ]; then
+                            echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
+                            docker logs "$SERVICE_CID" || true
+                            docker logs "${MONGO_CONT}" || true
+                            exit 1
                         fi
+                        sleep 2
+                    done
 
-                        cleanup() {
-                            docker rm -f "${API_CONT}" "${MONGO_CONT}" >/dev/null 2>&1 || true
-                            docker network rm "${API_NET}" >/dev/null 2>&1 || true
-                        }
+                    # 5. Ejecutar pruebas Newman
+                    API_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${API_CONT}")
 
-                        trap cleanup EXIT
-
-                        docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-
-                        docker network create --label "${CI_LABEL}" "${API_NET}" >/dev/null 2>&1 || true
-
-                        docker run -d --rm \
-                        --name "${MONGO_CONT}" \
-                        --label "${CI_LABEL}" \
-                        --network "${API_NET}" \
-                        --network-alias mongo \
-                        mongo:4.4
-
-                        docker run -d --rm \
-                        --name "${API_CONT}" \
-                        --label "${CI_LABEL}" \
-                        --network "${API_NET}" \
-                        --network-alias express-server \
-                        -e SERVER_PORT=3001 \
-                        -e MONGO_URI=mongodb://mongo:27017/tramitrack \
-                        ${BACKEND_IMAGE}:latest
-
-                        SERVICE_CID=$(docker ps -q -f name="^${API_CONT}$")
-
-                        # Wait for express-server to respond HTTP 200 on / (retry loop without Docker DNS)
-                        RETRIES=30
-                        COUNT=0
-                        echo "Waiting for express-server to become healthy"
-                        until docker exec "${API_CONT}" sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
-                            COUNT=$((COUNT+1))
-                            if [ "$COUNT" -ge "$RETRIES" ]; then
-                                echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
-                                # Dump container logs for debugging
-                                docker logs "$SERVICE_CID" || true
-                                docker logs "${MONGO_CONT}" || true
-                                exit 1
-                            fi
-                            sleep 2
-                        done
-
-                        API_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${API_CONT}")
-
-                        docker run --rm --network "${API_NET}" ${API_TEST_IMAGE} run coleccion.postman_collection.json -e entorno.postman_environment.json --env-var "url=http://${API_IP}:3001"
-                        '''
+                    docker run --rm --network "${API_NET}" ${API_TEST_IMAGE} \
+                    run coleccion.ci.json \
+                    -e entorno.postman_environment.json \
+                    --env-var "url=http://${API_IP}:3001"
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        unstable {
+            echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
+        }
+    }
+}
                         }
                     }
                 }
