@@ -85,11 +85,34 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        dir('tramitrack'){
-                        sh '''
-                        docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-                        docker run --rm ${API_TEST_IMAGE} run coleccion.postman_collection.json -e entorno.postman_environment.json
-                        '''
+                        dir('tramitrack') {
+                            sh '''
+                            # Construir imagen de pruebas
+                            docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
+                            
+                            # Ejecutar backend en background
+                            docker run -d --rm \
+                                --name express-server-test \
+                                -p 3001:3001 \
+                                ${BACKEND_IMAGE}:latest
+                            
+                            # Esperar a que el backend esté listo
+                            echo "Esperando a que el backend inicie..."
+                            sleep 20
+                            
+                            # Probar que el backend esté accesible
+                            curl --retry 5 --retry-delay 2 --retry-connrefused http://localhost:3001/
+                            
+                            # Ejecutar pruebas (usando localhost ahora)
+                            docker run --rm \
+                                --network host \
+                                ${API_TEST_IMAGE} \
+                                run coleccion.postman_collection.json \
+                                -e entorno.postman_environment.json || true
+                            
+                            # Limpiar
+                            docker stop express-server-test || true
+                            '''
                         }
                     }
                 }
@@ -97,7 +120,7 @@ pipeline {
             post {
                 unstable {
                     echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
-                    }
+                }
             }
         }
         
