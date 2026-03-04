@@ -129,7 +129,7 @@ pipeline {
                     echo "Waiting for MongoDB to become ready..."
                     MONGO_RETRIES=15
                     MONGO_COUNT=0
-                    until docker exec tramitrack-mongo-1 mongo --eval "db.runCommand(\'ping\').ok" --quiet 2>/dev/null; do
+                    until docker exec "${MONGO_CONT}" mongo --eval "db.runCommand(\'ping\').ok" --quiet 2>/dev/null; do
                         MONGO_COUNT=$((MONGO_COUNT+1))
                         if [ "$MONGO_COUNT" -ge "$MONGO_RETRIES" ]; then
                             echo "ERROR: MongoDB did not become ready"
@@ -156,7 +156,7 @@ pipeline {
                     RETRIES=30
                     COUNT=0
                     echo "Waiting for express-server to become healthy"
-                    until docker exec tramitrack-express-server-1 sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
+                    until docker exec express-server-1 sh -c "wget -q -T 2 -O /dev/null http://127.0.0.1:3001/"; do
                         COUNT=$((COUNT+1))
                         if [ "$COUNT" -ge "$RETRIES" ]; then
                             echo "ERROR: express-server did not become healthy after ${RETRIES} attempts"
