@@ -88,8 +88,22 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack'){
                         sh '''
+                        set -e
+
+                        cleanup() {
+                            docker compose -f docker-compose.yml down -v >/dev/null 2>&1 || true
+                        }
+
+                        trap cleanup EXIT
+
                         docker build -f tests/api/Dockerfile.test -t ${API_TEST_IMAGE} tests/api
-                        docker run --rm ${API_TEST_IMAGE} newman run coleccion.postman_collection.json -e entorno.postman_environment.json
+
+                        docker compose -f docker-compose.yml up -d mongo express-server
+                        sleep 20
+
+                        NETWORK_NAME=$(docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}' $(docker compose -f docker-compose.yml ps -q express-server))
+
+                        docker run --rm --network "${NETWORK_NAME}" ${API_TEST_IMAGE} run coleccion.postman_collection.json -e entorno.postman_environment.json
                         '''
                         }
                     }
