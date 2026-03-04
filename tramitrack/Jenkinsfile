@@ -147,7 +147,7 @@ pipeline {
                     --network "${API_NET}" \
                     --network-alias express-server \
                     -e SERVER_PORT=3001 \
-                    -e MONGO_URI=mongodb://mongo:27017/tramitrack \
+                    -e MONGO_URI=mongodb://mongo:27017/tramitrack?authSource=admin \
                     ${BACKEND_IMAGE}:latest
 
                     SERVICE_CID=$(docker ps -q -f name="^${API_CONT}$")
