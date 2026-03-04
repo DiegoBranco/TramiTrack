@@ -1,0 +1,294 @@
+{
+    "info": {
+        "name": "Pruebas POST /solicitudes",
+        "description": "Colección específica para las pruebas del endpoint POST /solicitudes.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Setup - Obtener Usuario",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "const users = pm.response.json();",
+                            "const user = users.find(u => u.correo === 'maximilianoc@gmail.com');",
+                            "pm.collectionVariables.set('userId', user._id);",
+                            "pm.test('Usuario encontrado', () => pm.expect(user).to.be.ok);"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{url}}/api/users",
+                    "host": [
+                        "{{url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "users"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "2. Setup - Obtener Tipo de Trámite",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "const tramites = pm.response.json();",
+                            "const tramite = tramites.find(t => t.nombre === 'Constancia de Estudios');",
+                            "pm.collectionVariables.set('tramiteId', tramite._id);",
+                            "pm.test('Trámite encontrado', () => pm.expect(tramite).to.be.ok);"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{url}}/api/tramite-types",
+                    "host": [
+                        "{{url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tramite-types"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "3. Pruebas POST /solicitudes",
+            "item": [
+                {
+                    "name": "3.1 [Valido] Creacion SIN archivo",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{url}}/api/solicitudes",
+                            "host": [
+                                "{{url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "solicitudes"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Estado es 201 Created', () => pm.response.to.have.status(201));",
+                                    "const res = pm.response.json();",
+                                    "pm.test('Respuesta contiene ID de la solicitud', () => pm.expect(res._id).to.exist);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.2 [Valido] Creacion CON archivo",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "estudiante_id",
+                                    "value": "{{userId}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "tramiteType_id",
+                                    "value": "{{tramiteId}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "datos_formulario",
+                                    "value": "{\"nombre\": \"Maximiliano\"}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "comprobante",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{url}}/api/solicitudes",
+                            "host": [
+                                "{{url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "solicitudes"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Estado es 201 Created', () => pm.response.to.have.status(201));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.3 [Invalido] Tipo Tramite 404",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"60d21b4667d0d8992e610c85\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{url}}/api/solicitudes",
+                            "host": [
+                                "{{url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "solicitudes"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Estado es 404 Not Found', () => pm.response.to.have.status(404));",
+                                    "pm.test('Mensaje indica que el tipo no se encontro', () => pm.expect(pm.response.json().message).to.include('no encontrado'));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.4 [Invalido] Usuario no autenticado",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"tramiteType_id\": \"{{tramiteId}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{url}}/api/solicitudes",
+                            "host": [
+                                "{{url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "solicitudes"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Debe arrojar Error (4xx o 500)', () => pm.expect(pm.response.code).to.be.oneOf([400, 401, 500]));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.5 [Invalido] IC/ID: Datos malformados",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"estudiante_id\": false,\n  \"tramiteType_id\": \"esto_no_es_un_mongo_id\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{url}}/api/solicitudes",
+                            "host": [
+                                "{{url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "solicitudes"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Debe fallar al parsear o validar ID', () => pm.expect(pm.response.code).to.be.oneOf([400, 500]));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "url",
+            "value": "http://localhost:3001"
+        },
+        {
+            "key": "userId",
+            "value": ""
+        },
+        {
+            "key": "tramiteId",
+            "value": ""
+        }
+    ]
+}
