@@ -187,14 +187,36 @@ pipeline {
                     # 5. Ejecutar pruebas Newman
                     API_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${API_CONT}")
 
-                    docker run --rm --network "${API_NET}" ${API_TEST_IMAGE} \
+                    # Run Newman and export HTML/JSON reports into ./reports (inside tramitrack)
+                    mkdir -p reports || true
+                    docker run --rm --network "${API_NET}" -v "$(pwd)/reports:/etc/newman" ${API_TEST_IMAGE} \
                     run coleccion.ci.json \
                     -e entorno.postman_environment.json \
-                    --env-var "url=http://${API_IP}:3001"
+                    --env-var "url=http://${API_IP}:3001" \
+                    -r htmlextra --reporter-htmlextra-export /etc/newman/report.html \
+                    --reporter-json-export /etc/newman/report.json || true
+
+                    # capture newman exit code so pipeline can decide later (we used set -e)
+                    echo $? > newman_exit_code || true
                     '''
                         }
                 }
+
+            // After the shell finishes, archive reports and mark UNSTABLE if Newman failed
+            def newmanRc = 0
+            if (fileExists('tramitrack/newman_exit_code')) {
+                newmanRc = readFile('tramitrack/newman_exit_code').trim() as Integer
             }
+            if (fileExists('tramitrack/reports/report.html') || fileExists('tramitrack/reports/report.json')) {
+                archiveArtifacts artifacts: 'tramitrack/reports/**', fingerprint: true
+            }
+            if (newmanRc != 0) {
+                currentBuild.result = 'UNSTABLE'
+                echo "Newman reported failures (exit=${newmanRc}); marking build UNSTABLE"
+            } else {
+                echo "Newman OK"
+            }
+        }
             post {
                 failure {
                     echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
