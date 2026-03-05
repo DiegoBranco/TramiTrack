@@ -207,7 +207,7 @@ pipeline {
             }
             post {
                 failure {
-                    echo 'AVISO: No se ejecutaron pruebas de API o los archivos no estan presentes'
+                    echo 'AVISO: fallo en pruebas API o en la configuración'
                     }
             }
         }

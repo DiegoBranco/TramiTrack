@@ -133,7 +133,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\"\n  }\n}"
+          "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\",\n    \"cedula\": \"29123456\"\n  }\n}"
         },
         "url": {
           "raw": "{{url}}/api/solicitudes",
@@ -168,7 +168,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"estudiante_id\": \"{{otherUserId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Otro\",\n    \"apellido\": \"Usuario\"\n  }\n}"
+          "raw": "{\n  \"estudiante_id\": \"{{otherUserId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Otro\",\n    \"apellido\": \"Usuario\",\n    \"correo\": \"otro.usuario@example.com\",\n    \"cedula\": \"87654321\"\n  }\n}"
         },
         "url": {
           "raw": "{{url}}/api/solicitudes",
@@ -192,7 +192,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\"\n  }\n}"
+              "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\",\n    \"cedula\": \"29123456\"\n  }\n}"
             },
             "url": {
               "raw": "{{url}}/api/solicitudes",
@@ -234,7 +234,7 @@
                 },
                 {
                   "key": "datos_formulario",
-                  "value": "{\"nombre\": \"Maximiliano\"}",
+                  "value": "{\"nombre\": \"Maximiliano\",\"apellido\": \"Carrillo\",\"correo\": \"maximilianoc@gmail.com\",\"cedula\": \"29123456\"}",
                   "type": "text"
                 },
                 {

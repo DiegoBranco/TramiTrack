@@ -107,7 +107,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\"\n  }\n}"
+          "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\",\n    \"cedula\": \"29123456\"\n  }\n}"
         },
         "url": {
           "raw": "{{url}}/api/solicitudes",
