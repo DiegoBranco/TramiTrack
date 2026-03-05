@@ -392,39 +392,78 @@
       ]
     },
     {
-      "name": "6. Admin - Cambiar Estado a Entregado",
-      "event": [
+      "name": "6. Admin - Procesar Solicitud (en_proceso -> completado)",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Cambio de estado exitoso', () => pm.response.to.have.status(200));",
-              "const res = pm.response.json();",
-              "pm.test('Estado final es entregado', () => pm.expect(res.estado).to.eql('entregado'));",
-              "pm.test('Validación de número de seguimiento', () => {\n    pm.expect(res.numero_seguimiento).to.match(/^TRM-\\d{6}$/);\n});"
+          "name": "6.1 Admin - Cambiar a en_proceso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Cambio a en_proceso exitoso', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('Estado es en_proceso', () => pm.expect(res.estado).to.eql('en_proceso'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "type": "text/javascript"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_proceso\",\n  \"observaciones\": \"Iniciado procesamiento por CI\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/api/solicitudes/{{solicitudId}}/estado",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes", "{{solicitudId}}", "estado"]
+            }
           }
-        }
-      ],
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"estado\": \"entregado\",\n  \"observaciones\": \"Trámite procesado automáticamente por el sistema de CI/CD\"\n}"
         },
-        "url": {
-          "raw": "{{url}}/api/solicitudes/{{solicitudId}}/estado",
-          "host": ["{{url}}"],
-          "path": ["api", "solicitudes", "{{solicitudId}}", "estado"]
+        {
+          "name": "6.2 Admin - Cambiar a completado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Cambio a completado exitoso', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('Estado final es completado', () => pm.expect(res.estado).to.eql('completado'));",
+                  "pm.test('Validación de número de seguimiento', () => { pm.expect(res.numero_seguimiento).to.match(/^TRM-\\d{6}$/); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"completado\",\n  \"observaciones\": \"Completado por CI\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/api/solicitudes/{{solicitudId}}/estado",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes", "{{solicitudId}}", "estado"]
+            }
+          }
         }
-      }
+      ]
     }
   ],
   "variable": [
