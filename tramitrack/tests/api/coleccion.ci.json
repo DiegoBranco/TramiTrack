@@ -55,6 +55,32 @@
       }
     },
     {
+      "name": "1.1 Setup - Obtener Otro Usuario",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const users = pm.response.json();",
+              "const user = users.find(u => u.correo !== 'maximilianoc@gmail.com');",
+              "pm.collectionVariables.set('otherUserId', user && user._id ? user._id : '');",
+              "pm.test('Usuario alterno encontrado', () => pm.expect(user).to.be.ok);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/users",
+          "host": ["{{url}}"],
+          "path": ["api", "users"]
+        }
+      }
+    },
+    {
       "name": "2. Setup - Obtener Tipo de Trámite",
       "event": [
         {
@@ -117,10 +143,259 @@
       }
     },
     {
-      "name": "4. Admin - Procesar Solicitud (en_proceso -> completado)",
+      "name": "3.1 Crear Solicitud de Otro Usuario",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Solicitud ajena creada', () => pm.response.to.have.status(201));",
+              "const res = pm.response.json();",
+              "pm.collectionVariables.set('solicitudAjenaId', res._id);",
+              "pm.test('ID de solicitud ajena existe', () => pm.expect(res._id).to.exist);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estudiante_id\": \"{{otherUserId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Otro\",\n    \"apellido\": \"Usuario\",\n    \"correo\": \"otro.usuario@example.com\",\n    \"cedula\": \"87654321\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/solicitudes",
+          "host": ["{{url}}"],
+          "path": ["api", "solicitudes"]
+        }
+      }
+    },
+    {
+      "name": "4. Pruebas POST /solicitudes",
       "item": [
         {
-          "name": "4.1 Admin - Cambiar a en_proceso",
+          "name": "4.1 Creacion SIN archivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\",\n    \"cedula\": \"29123456\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{url}}/api/solicitudes",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado es 201 Created', () => pm.response.to.have.status(201));",
+                  "const res = pm.response.json();",
+                  "pm.test('Respuesta contiene ID de la solicitud', () => pm.expect(res._id).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 Creacion CON archivo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "estudiante_id",
+                  "value": "{{userId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "tramiteType_id",
+                  "value": "{{tramiteId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "datos_formulario",
+                  "value": "{\"nombre\": \"Maximiliano\",\"apellido\": \"Carrillo\",\"correo\": \"maximilianoc@gmail.com\",\"cedula\": \"29123456\"}",
+                  "type": "text"
+                },
+                {
+                  "key": "comprobante",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/api/solicitudes",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado es 201 Created', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.3 Usuario no autenticado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tramiteType_id\": \"{{tramiteId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/api/solicitudes",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Simula logout guardando y eliminando userId (mimica localStorage)",
+                  "pm.collectionVariables.set('prev_userId', pm.collectionVariables.get('userId') || '');",
+                  "pm.collectionVariables.unset('userId');"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe arrojar Error (4xx o 500)', () => pm.expect(pm.response.code).to.be.oneOf([400, 401, 500]));",
+                  "// Restaurar userId guardado para no afectar otros tests",
+                  "const prev = pm.collectionVariables.get('prev_userId');",
+                  "if(prev && prev.length) pm.collectionVariables.set('userId', prev);",
+                  "pm.collectionVariables.unset('prev_userId');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+        
+      ]
+    },
+    {
+      "name": "5. Pruebas GET /solicitudes/:id",
+      "item": [
+        {
+          "name": "5.1 Solicitud propia",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/api/solicitudes/{{solicitudId}}",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes", "{{solicitudId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado es 200 OK', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('ID coincide', () => pm.expect(res._id).to.eql(pm.collectionVariables.get('solicitudId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.2 Solicitud ajena sin auth en backend",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/api/solicitudes/{{solicitudAjenaId}}",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes", "{{solicitudAjenaId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado es 200 OK', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('ID coincide', () => pm.expect(res._id).to.eql(pm.collectionVariables.get('solicitudAjenaId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.3 Solicitud inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/api/solicitudes/{{solicitudInexistenteId}}",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes", "{{solicitudInexistenteId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado es 404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('Mensaje indica solicitud no encontrada', () => pm.expect(pm.response.json().message).to.include('no encontrada'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Admin - Procesar Solicitud (en_proceso -> completado)",
+      "item": [
+        {
+          "name": "6.1 Admin - Cambiar a en_proceso",
           "event": [
             {
               "listen": "test",
@@ -154,7 +429,7 @@
           }
         },
         {
-          "name": "4.2 Admin - Cambiar a completado",
+          "name": "6.2 Admin - Cambiar a completado",
           "event": [
             {
               "listen": "test",
@@ -163,7 +438,7 @@
                   "pm.test('Cambio a completado exitoso', () => pm.response.to.have.status(200));",
                   "const res = pm.response.json();",
                   "pm.test('Estado final es completado', () => pm.expect(res.estado).to.eql('completado'));",
-                  "pm.test('Validación de número de seguimiento', () => { pm.expect(res.numero_seguimiento).to.match(/^TRM-\\d{6}$/); });"
+                  "pm.test('Validación de número de seguimiento', () => pm.expect(res.numero_seguimiento).to.match(/^TRM-\\d{6}$/));"
                 ],
                 "type": "text/javascript"
               }
@@ -195,6 +470,30 @@
     {
       "key": "url",
       "value": "http://express-server:3001"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "otherUserId",
+      "value": ""
+    },
+    {
+      "key": "tramiteId",
+      "value": ""
+    },
+    {
+      "key": "solicitudId",
+      "value": ""
+    },
+    {
+      "key": "solicitudAjenaId",
+      "value": ""
+    },
+    {
+      "key": "solicitudInexistenteId",
+      "value": "000000000000000000000000"
     }
   ]
 }
