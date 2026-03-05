@@ -78,10 +78,10 @@ pipeline {
                 dir('tramitrack') {
                     sh '''
                     set -e
-                    docker build -f tests/unit/Dockerfile.unit -t ${UNIT_TEST_IMAGE} tests/unit
+                    docker build -f tests/unit/Dockerfile.unit -t ${UNIT_TEST_IMAGE} .
                     UNIT_TEST_CONTAINER=$(docker create ${UNIT_TEST_IMAGE})
                     docker start -a ${UNIT_TEST_CONTAINER}
-                    docker cp ${UNIT_TEST_CONTAINER}:/app/junit.xml tests/unit/junit.xml || true
+                    docker cp ${UNIT_TEST_CONTAINER}:/app/tests/unit/junit.xml tests/unit/junit.xml || true
                     docker rm -f ${UNIT_TEST_CONTAINER} >/dev/null 2>&1 || true
                     '''
                 }
