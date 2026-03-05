@@ -88,7 +88,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Solicitud creada', () => pm.response.to.have.status(200));",
+              "pm.test('Solicitud creada', () => pm.response.to.have.status(201));",
               "const res = pm.response.json();",
               "pm.collectionVariables.set('solicitudId', res._id);",
               "pm.test('Estado inicial es pendiente', () => pm.expect(res.estado).to.eql('pendiente'));"
