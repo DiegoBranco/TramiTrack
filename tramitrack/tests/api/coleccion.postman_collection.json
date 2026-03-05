@@ -205,9 +205,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Estado es 201 Created', () => pm.response.to.have.status(201));",
-                  "const res = pm.response.json();",
-                  "pm.test('Respuesta contiene ID de la solicitud', () => pm.expect(res._id).to.exist);"
+                  "pm.test('Estado es 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Mensaje indica comprobante requerido', () => pm.expect(pm.response.json().message).to.include('Se requiere un comprobante'));"
                 ],
                 "type": "text/javascript"
               }
