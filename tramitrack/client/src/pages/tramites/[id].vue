@@ -1,5 +1,9 @@
 <template>
-  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+  <v-container
+    class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4"
+    style="padding-top: 13px"
+    fluid
+  >
     <AppBreadcrumbs class="mb-2" />
 
     <!-- Loading state -->
@@ -24,7 +28,7 @@
         <v-btn
           color="primary"
           class="mt-4"
-          to="/inicio"
+          to="/home"
           prepend-icon="mdi-arrow-left"
         >
           Volver al Inicio
@@ -65,24 +69,35 @@
             <v-card-text class="pt-1">
               <v-row dense>
                 <v-col cols="12" sm="6">
-                  <p class="text-caption text-grey-darken-1 mb-0">Nombre del Trámite:</p>
+                  <p class="text-caption text-grey-darken-1 mb-0">
+                    Nombre del Trámite:
+                  </p>
                   <p class="text-body-2 font-weight-medium mb-2">
                     {{ tramite.tramiteType_id?.nombre || "No especificado" }}
                   </p>
 
                   <p class="text-caption text-grey-darken-1 mb-0">Vigencia:</p>
                   <p class="text-body-2 font-weight-medium mb-2">
-                    {{ formatVigencia(tramite.fecha_solicitud, tramite.fecha_estimada) }}
+                    {{
+                      formatVigencia(
+                        tramite.fecha_solicitud,
+                        tramite.fecha_estimada,
+                      )
+                    }}
                   </p>
 
-                  <p class="text-caption text-grey-darken-1 mb-0">Fecha solicitada:</p>
+                  <p class="text-caption text-grey-darken-1 mb-0">
+                    Fecha solicitada:
+                  </p>
                   <p class="text-body-2 font-weight-medium mb-0">
                     {{ formatDate(tramite.fecha_solicitud) }}
                   </p>
                 </v-col>
 
                 <v-col cols="12" sm="6">
-                  <p class="text-caption text-grey-darken-1 mb-0">Requisitos:</p>
+                  <p class="text-caption text-grey-darken-1 mb-0">
+                    Requisitos:
+                  </p>
                   <p class="text-body-2">
                     {{
                       tramite.tramiteType_id?.descripcion ||
@@ -155,14 +170,18 @@
               <v-divider class="my-2"></v-divider>
 
               <div class="d-flex justify-space-between align-center mb-1">
-                <span class="text-body-2 text-grey-darken-1">Fecha estimada:</span>
+                <span class="text-body-2 text-grey-darken-1"
+                  >Fecha estimada:</span
+                >
                 <span class="text-body-2 font-weight-medium">{{
                   formatDate(tramite.fecha_estimada)
                 }}</span>
               </div>
 
               <div class="d-flex justify-space-between align-center mb-1">
-                <span class="text-body-2 text-grey-darken-1">Tiempo restante:</span>
+                <span class="text-body-2 text-grey-darken-1"
+                  >Tiempo restante:</span
+                >
                 <span
                   class="text-body-2 font-weight-medium"
                   :class="tiempoRestanteColor"
@@ -172,7 +191,9 @@
               </div>
 
               <div class="d-flex justify-space-between align-center">
-                <span class="text-body-2 text-grey-darken-1">Estado actual:</span>
+                <span class="text-body-2 text-grey-darken-1"
+                  >Estado actual:</span
+                >
                 <v-chip
                   :color="getStatusColor(tramite.estado)"
                   size="small"
@@ -189,15 +210,25 @@
               <!-- Acciones -->
               <div class="d-flex flex-column ga-2">
                 <v-btn
-                  :color="['entregado', 'completado'].includes(tramite.estado) ? 'primary' : 'grey-darken-1'"
-                  :variant="['entregado', 'completado'].includes(tramite.estado) ? 'flat' : 'outlined'"
+                  :color="
+                    ['entregado', 'completado'].includes(tramite.estado)
+                      ? 'primary'
+                      : 'grey-darken-1'
+                  "
+                  :variant="
+                    ['entregado', 'completado'].includes(tramite.estado)
+                      ? 'flat'
+                      : 'outlined'
+                  "
                   prepend-icon="mdi-download"
                   block
                   size="small"
-                  :disabled="!['entregado', 'completado'].includes(tramite.estado)"
+                  :disabled="
+                    !['entregado', 'completado'].includes(tramite.estado)
+                  "
                   @click="descargarDocumentoFinal"
                 >
-                  Descargar {{ tramite.tramiteType_id?.nombre || 'Documento' }}
+                  Descargar {{ tramite.tramiteType_id?.nombre || "Documento" }}
                 </v-btn>
 
                 <v-btn
@@ -217,7 +248,9 @@
           <!-- SEGUIMIENTO -->
           <v-card class="rounded-lg mb-4" elevation="1">
             <v-card-item class="pb-1">
-              <v-card-title class="font-bitter text-subtitle-1 font-weight-bold px-0 pt-0">
+              <v-card-title
+                class="font-bitter text-subtitle-1 font-weight-bold px-0 pt-0"
+              >
                 SEGUIMIENTO
               </v-card-title>
             </v-card-item>
@@ -230,44 +263,111 @@
                     <v-icon size="16" color="white">mdi-check-bold</v-icon>
                   </div>
                   <span class="step-label">Recibido</span>
-                  <span class="step-date">{{ formatDate(tramite.fecha_solicitud) }}</span>
+                  <span class="step-date">{{
+                    formatDate(tramite.fecha_solicitud)
+                  }}</span>
                 </div>
 
-                <div class="step-connector" :class="{ 'connector-active': estadoProgreso.procesando.color !== 'grey' }"></div>
+                <div
+                  class="step-connector"
+                  :class="{
+                    'connector-active':
+                      estadoProgreso.procesando.color !== 'grey',
+                  }"
+                ></div>
 
                 <!-- Procesando -->
                 <div class="stepper-step">
-                  <div class="step-circle" :class="getStepCircleClass(estadoProgreso.procesando.color)">
-                    <v-icon v-if="estadoProgreso.procesando.color === 'success'" size="16" color="white">mdi-check-bold</v-icon>
-                    <v-icon v-else-if="estadoProgreso.procesando.color === 'error'" size="16" color="white">mdi-close-thick</v-icon>
-                    <div v-else-if="estadoProgreso.procesando.color !== 'grey'" class="inner-dot"></div>
+                  <div
+                    class="step-circle"
+                    :class="getStepCircleClass(estadoProgreso.procesando.color)"
+                  >
+                    <v-icon
+                      v-if="estadoProgreso.procesando.color === 'success'"
+                      size="16"
+                      color="white"
+                      >mdi-check-bold</v-icon
+                    >
+                    <v-icon
+                      v-else-if="estadoProgreso.procesando.color === 'error'"
+                      size="16"
+                      color="white"
+                      >mdi-close-thick</v-icon
+                    >
+                    <div
+                      v-else-if="estadoProgreso.procesando.color !== 'grey'"
+                      class="inner-dot"
+                    ></div>
                   </div>
-                  <span class="step-label">{{ estadoProgreso.procesando.color === 'error' ? 'Rechazado' : 'Procesando' }}</span>
-                  <span class="step-date">{{ estadoProgreso.procesando.fecha || 'Pendiente' }}</span>
+                  <span class="step-label">{{
+                    estadoProgreso.procesando.color === "error"
+                      ? "Rechazado"
+                      : "Procesando"
+                  }}</span>
+                  <span class="step-date">{{
+                    estadoProgreso.procesando.fecha || "Pendiente"
+                  }}</span>
                 </div>
 
-                <div class="step-connector" :class="{ 'connector-active': estadoProgreso.listo.color !== 'grey' }"></div>
+                <div
+                  class="step-connector"
+                  :class="{
+                    'connector-active': estadoProgreso.listo.color !== 'grey',
+                  }"
+                ></div>
 
                 <!-- Listo -->
                 <div class="stepper-step">
-                  <div class="step-circle" :class="getStepCircleClass(estadoProgreso.listo.color)">
-                    <v-icon v-if="estadoProgreso.listo.color === 'success'" size="16" color="white">mdi-check-bold</v-icon>
-                    <div v-else-if="estadoProgreso.listo.color !== 'grey'" class="inner-dot"></div>
+                  <div
+                    class="step-circle"
+                    :class="getStepCircleClass(estadoProgreso.listo.color)"
+                  >
+                    <v-icon
+                      v-if="estadoProgreso.listo.color === 'success'"
+                      size="16"
+                      color="white"
+                      >mdi-check-bold</v-icon
+                    >
+                    <div
+                      v-else-if="estadoProgreso.listo.color !== 'grey'"
+                      class="inner-dot"
+                    ></div>
                   </div>
                   <span class="step-label">Listo</span>
-                  <span class="step-date">{{ estadoProgreso.listo.fecha || 'Pendiente' }}</span>
+                  <span class="step-date">{{
+                    estadoProgreso.listo.fecha || "Pendiente"
+                  }}</span>
                 </div>
 
-                <div class="step-connector" :class="{ 'connector-active': estadoProgreso.entregado.color !== 'grey' }"></div>
+                <div
+                  class="step-connector"
+                  :class="{
+                    'connector-active':
+                      estadoProgreso.entregado.color !== 'grey',
+                  }"
+                ></div>
 
                 <!-- Entregado -->
                 <div class="stepper-step">
-                  <div class="step-circle" :class="getStepCircleClass(estadoProgreso.entregado.color)">
-                    <v-icon v-if="estadoProgreso.entregado.color === 'success'" size="16" color="white">mdi-check-bold</v-icon>
-                    <div v-else-if="estadoProgreso.entregado.color !== 'grey'" class="inner-dot"></div>
+                  <div
+                    class="step-circle"
+                    :class="getStepCircleClass(estadoProgreso.entregado.color)"
+                  >
+                    <v-icon
+                      v-if="estadoProgreso.entregado.color === 'success'"
+                      size="16"
+                      color="white"
+                      >mdi-check-bold</v-icon
+                    >
+                    <div
+                      v-else-if="estadoProgreso.entregado.color !== 'grey'"
+                      class="inner-dot"
+                    ></div>
                   </div>
                   <span class="step-label">Entregado</span>
-                  <span class="step-date">{{ estadoProgreso.entregado.fecha || 'Pendiente' }}</span>
+                  <span class="step-date">{{
+                    estadoProgreso.entregado.fecha || "Pendiente"
+                  }}</span>
                 </div>
               </div>
             </v-card-text>
@@ -293,10 +393,11 @@
       <v-row class="mt-6">
         <v-col cols="12">
           <v-btn
+            data-testid="volver-inicio-btn"
             variant="outlined"
             color="primary"
             prepend-icon="mdi-arrow-left"
-            to="/inicio"
+            to="/home"
           >
             Volver al Inicio
           </v-btn>
@@ -355,7 +456,8 @@ const estudianteNombre = computed(() => {
 const getInitials = computed(() => {
   if (!tramite.value) return "??";
   const estudiante = tramite.value.estudiante_id as any;
-  let nombre = "", apellido = "";
+  let nombre = "",
+    apellido = "";
   if (estudiante && (estudiante.nombre || estudiante.apellido)) {
     nombre = estudiante.nombre || "";
     apellido = estudiante.apellido || "";

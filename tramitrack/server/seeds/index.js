@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const TramiteType = require("../models/tramiteType.model");
+const Solicitud = require("../models/solicitud.model");
 
 const seedDatabase = async () => {
   try {
@@ -85,6 +86,39 @@ const seedDatabase = async () => {
         await TramiteType.create(t);
         console.log(`Trámite creado: ${t.nombre}`);
       }
+    }
+
+    // --- SEED DE SOLICITUD DE PRUEBA ---
+    // Crear una solicitud de "Constancia de Estudios" usando un estudiante existente
+    const tramiteConstancia = await TramiteType.findOne({ nombre: "Constancia de Estudios" });
+    const estudiante = await User.findOne({ correo: "maximilianoc@gmail.com" }) || await User.findOne({ correo: "oscary.arocha@gmail.com" });
+
+    if (tramiteConstancia && estudiante) {
+      // Evitar duplicados: buscar una solicitud reciente del mismo estudiante y tipo
+      const existeSol = await Solicitud.findOne({ estudiante_id: estudiante._id, tramiteType_id: tramiteConstancia._id });
+      
+        const nueva = {
+          estudiante_id: estudiante._id,
+          tramiteType_id: tramiteConstancia._id,
+          estado: 'pendiente',
+          observaciones: 'Solicitud de prueba generada por seed',
+          datos_formulario: {
+            nombre: estudiante.nombre,
+            apellido: estudiante.apellido,
+            cedula: estudiante.cedula,
+            correo: estudiante.correo,
+            cuenta_bancaria: '11111111111111111111',
+            referencia_pago: 'SEED-REF-0001',
+            monto: 10000,
+            fecha_pago: new Date(),
+          },
+        };
+
+        await Solicitud.create(nueva);
+        console.log('Solicitud de prueba creada para', estudiante.correo);
+    
+    } else {
+      console.log('No se encontró usuario o tipo de trámite para crear la solicitud de seed.');
     }
 
     console.log("Proceso de seeding completado.");

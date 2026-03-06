@@ -6,6 +6,7 @@
         "logs": "docker-compose logs -f"
     },
     "devDependencies": {
+        "cypress": "^15.11.0",
         "jest": "^30.2.0"
     }
 }
