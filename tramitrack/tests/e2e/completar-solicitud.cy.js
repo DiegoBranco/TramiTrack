@@ -13,7 +13,7 @@ describe("Flujo completo: Solicitar constancia de estudios", () => {
     // PASO 1: Login
     // ============================================
     cy.visit("/login");
-
+    cy.log("Iniciando sesión...");
     // Verificar que estamos en la página de login
     cy.contains("Iniciar Sesión").should("be.visible");
     cy.contains("TRAMITRACK").should("be.visible"); // Nota: está en mayúsculas en el template
