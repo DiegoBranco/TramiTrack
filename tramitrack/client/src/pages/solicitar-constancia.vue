@@ -1,5 +1,9 @@
 <template>
-  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+  <v-container
+    class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4"
+    style="padding-top: 13px"
+    fluid
+  >
     <app-breadcrumbs class="mb-2" />
 
     <!-- Loading State -->
@@ -163,14 +167,22 @@
         </v-col>
 
         <v-col cols="12" md="8" lg="9">
-          <v-card class="pa-6 rounded-lg fill-height d-flex flex-column" elevation="1">
-            <v-form ref="form" v-model="valid" class="d-flex flex-column flex-grow-1">
+          <v-card
+            class="pa-6 rounded-lg fill-height d-flex flex-column"
+            elevation="1"
+          >
+            <v-form
+              ref="form"
+              v-model="valid"
+              class="d-flex flex-column flex-grow-1"
+            >
               <v-row dense>
                 <v-col cols="12" sm="6">
                   <label class="text-caption font-weight-bold mb-4 mt-4 d-block"
                     >Nombre *</label
                   >
                   <v-text-field
+                    data-testid="nombre-input"
                     v-model="formData.nombre"
                     placeholder="Ingresa tu nombre"
                     variant="solo-filled"
@@ -187,6 +199,7 @@
                     >Apellido *</label
                   >
                   <v-text-field
+                    data-testid="apellido-input"
                     v-model="formData.apellido"
                     placeholder="Ingresa tu apellido"
                     variant="solo-filled"
@@ -204,6 +217,7 @@
                     >Cédula de Identidad *</label
                   >
                   <v-text-field
+                    data-testid="cedula-input"
                     v-model="formData.cedula"
                     placeholder="12345678"
                     variant="solo-filled"
@@ -220,6 +234,7 @@
                     >Correo Electrónico *</label
                   >
                   <v-text-field
+                    data-testid="correo-input"
                     v-model="formData.correo"
                     placeholder="nombre@ejemplo.com"
                     variant="solo-filled"
@@ -237,6 +252,7 @@
                     >Cuenta Bancaria de origen *</label
                   >
                   <v-text-field
+                    data-testid="cuenta-origen-input"
                     v-model="formData.cuentaOrigen"
                     placeholder="091052507122"
                     variant="solo-filled"
@@ -252,6 +268,7 @@
                     >Nro. de Referencia de pago *</label
                   >
                   <v-text-field
+                    data-testid="referencia-pago-input"
                     v-model="formData.referenciaPago"
                     placeholder="091052507122"
                     variant="solo-filled"
@@ -268,6 +285,7 @@
                     >Fecha del pago *</label
                   >
                   <v-text-field
+                    data-testid="fecha-pago-input"
                     v-model="formData.fechaPago"
                     type="date"
                     variant="solo-filled"
@@ -283,6 +301,7 @@
                     >Monto *</label
                   >
                   <v-text-field
+                    data-testid="monto-input"
                     v-model="formData.monto"
                     placeholder="1850"
                     variant="solo-filled"
@@ -299,6 +318,7 @@
                     >Comprobante de Pago *</label
                   >
                   <v-file-input
+                    data-testid="comprobante-input"
                     v-model="formData.comprobante"
                     label="Arrastra el archivo aquí o haz clic para seleccionar"
                     variant="outlined"
@@ -326,6 +346,7 @@
                   Cancelar
                 </v-btn>
                 <v-btn
+                  data-testid="enviar-solicitud-btn"
                   variant="flat"
                   color="primary"
                   class="font-weight-bold px-6 rounded-lg text-none"
