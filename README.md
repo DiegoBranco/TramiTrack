@@ -25,7 +25,7 @@ Sigue estos pasos para levantar el entorno local:
 
 ## 1. Clonar el repositorio
 ```
-git clone [https://github.com/tu-usuario/tramitrack.git](https://github.com/DiegoBranco/TramiTrack.git)
+git clone https://github.com/DiegoBranco/TramiTrack.git
 cd tramitrack
 ```
 ## 2. Configurar variables de entorno
