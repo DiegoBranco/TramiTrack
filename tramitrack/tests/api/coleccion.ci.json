@@ -108,76 +108,6 @@
       }
     },
     {
-      "name": "3. Crear Solicitud Nueva",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Solicitud creada', () => pm.response.to.have.status(201));",
-              "const res = pm.response.json();",
-              "pm.collectionVariables.set('solicitudId', res._id);",
-              "pm.test('Estado inicial es pendiente', () => pm.expect(res.estado).to.eql('pendiente'));"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"estudiante_id\": \"{{userId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Maximiliano\",\n    \"apellido\": \"Carrillo\",\n    \"correo\": \"maximilianoc@gmail.com\",\n    \"cedula\": \"29123456\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{url}}/api/solicitudes",
-          "host": ["{{url}}"],
-          "path": ["api", "solicitudes"]
-        }
-      }
-    },
-    {
-      "name": "3.1 Crear Solicitud de Otro Usuario",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Solicitud ajena creada', () => pm.response.to.have.status(201));",
-              "const res = pm.response.json();",
-              "pm.collectionVariables.set('solicitudAjenaId', res._id);",
-              "pm.test('ID de solicitud ajena existe', () => pm.expect(res._id).to.exist);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"estudiante_id\": \"{{otherUserId}}\",\n  \"tramiteType_id\": \"{{tramiteId}}\",\n  \"datos_formulario\": {\n    \"nombre\": \"Otro\",\n    \"apellido\": \"Usuario\",\n    \"correo\": \"otro.usuario@example.com\",\n    \"cedula\": \"87654321\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{url}}/api/solicitudes",
-          "host": ["{{url}}"],
-          "path": ["api", "solicitudes"]
-        }
-      }
-    },
-    {
       "name": "4. Pruebas POST /solicitudes",
       "item": [
         {
@@ -254,7 +184,10 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Estado es 201 Created', () => pm.response.to.have.status(201));"
+                  "pm.test('Solicitud creada', () => pm.response.to.have.status(201));",
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('solicitudId', res._id);",
+                  "pm.test('Estado inicial es pendiente', () => pm.expect(res.estado).to.eql('pendiente'));"
                 ],
                 "type": "text/javascript"
               }
