@@ -325,18 +325,18 @@
       ]
     },
     {
-      "name": "6. Admin - Procesar Solicitud (en_proceso -> completado)",
+      "name": "6. Admin - Procesar Solicitud (pendiente -> en proceso)",
       "item": [
         {
-          "name": "6.1 Admin - Cambiar a en_proceso",
+          "name": "6.1 Admin - Cambiar a en proceso",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Cambio a en_proceso exitoso', () => pm.response.to.have.status(200));",
+                  "pm.test('Cambio a en proceso exitoso', () => pm.response.to.have.status(200));",
                   "const res = pm.response.json();",
-                  "pm.test('Estado es en_proceso', () => pm.expect(res.estado).to.eql('en_proceso'));"
+                  "pm.test('Estado es en proceso', () => pm.expect(res.estado).to.eql('en_proceso'));"
                 ],
                 "type": "text/javascript"
               }
@@ -368,7 +368,7 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Cambio a completado exitoso', () => pm.response.to.have.status(200));",
+                  "pm.test('Cambio a completado', () => pm.response.to.have.status(200));",
                   "const res = pm.response.json();",
                   "pm.test('Estado final es completado', () => pm.expect(res.estado).to.eql('completado'));",
                   "pm.test('Validación de número de seguimiento', () => pm.expect(res.numero_seguimiento).to.match(/^TRM-\\d{6}$/));"
