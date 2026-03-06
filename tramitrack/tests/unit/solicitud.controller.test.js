@@ -2,7 +2,7 @@ const SolicitudController = require('../../server/controllers/solicitud.controll
 const Solicitud = require('../../server/models/solicitud.model');
 
 // Mock the Solicitud model
-jest.mock('../models/solicitud.model');
+jest.mock('../../server/models/solicitud.model');
 
 describe('SolicitudController.updateEstado', () => {
     let req, res;
