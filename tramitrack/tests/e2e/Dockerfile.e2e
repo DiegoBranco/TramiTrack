@@ -3,7 +3,7 @@ FROM cypress/included:12.0.0
 WORKDIR /e2e
 
 # Copy Cypress config and specs from project root build context.
-COPY tests/e2e/cypress.config.js ./
-COPY tests/e2e ./tests/e2e
+COPY cypress.config.js ./
+COPY *.cy.js ./
 
 ENTRYPOINT ["cypress", "run"]

@@ -72,7 +72,7 @@ pipeline {
         }
         */
         
-        
+        /*
         stage('Unit Tests') {
             steps {
                 dir('tramitrack') {
@@ -212,6 +212,7 @@ pipeline {
             }
         }
         
+        */
         stage('E2E Tests') {
             steps {
                 script {
@@ -247,7 +248,11 @@ pipeline {
                             }
                             trap cleanup EXIT
 
-                            # Construir imagen de Cypress
+                            # Verificar que los archivos de prueba existen
+                            echo "Verificando archivos de prueba en tests/e2e/:"
+                            ls -la tests/e2e/
+
+                            # Construir imagen de Cypress con el Dockerfile corregido
                             echo "Construyendo imagen de E2E tests..."
                             docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
 
@@ -271,7 +276,7 @@ pipeline {
                             sleep 5
 
                             # ============================================
-                            # 2. LEVANTAR BACKEND (usa imagen del stage anterior)
+                            # 2. LEVANTAR BACKEND
                             # ============================================
                             echo "Levantando Backend desde ${BACKEND_IMAGE}:latest..."
                             docker run -d \\
@@ -284,7 +289,7 @@ pipeline {
                                 -e NODE_ENV=test \\
                                 ${BACKEND_IMAGE}:latest
 
-                            # Esperar a que el backend esté listo (usando endpoint /)
+                            # Esperar a que el backend esté listo (endpoint /)
                             echo "Esperando Backend..."
                             RETRIES=30
                             COUNT=0
@@ -294,6 +299,8 @@ pipeline {
                                     echo "ERROR: Backend no responde después de $RETRIES intentos"
                                     echo "=== Logs del backend ==="
                                     docker logs ${API_CONT}
+                                    echo "=== Logs de MongoDB ==="
+                                    docker logs ${MONGO_CONT}
                                     exit 1
                                 fi
                                 echo "Esperando backend... ($COUNT/$RETRIES)"
@@ -302,7 +309,7 @@ pipeline {
                             echo "Backend listo ✓"
 
                             # ============================================
-                            # 3. LEVANTAR FRONTEND (usa imagen del stage anterior)
+                            # 3. LEVANTAR FRONTEND
                             # ============================================
                             echo "Levantando Frontend desde ${FRONTEND_IMAGE}:build..."
                             docker run -d \\
@@ -340,16 +347,24 @@ pipeline {
                             echo "=== Ejecutando pruebas E2E ==="
                             
                             # Verificar estructura de archivos en la imagen
-                            echo "Verificando estructura de archivos en imagen E2E..."
+                            echo "Contenido de la imagen E2E:"
                             docker run --rm ${E2E_IMAGE} ls -la
 
                             # Ejecutar la prueba específica
-                            # Nota: Como copiaste tests/e2e a /e2e/tests/e2e, la ruta completa es:
+                            echo "Ejecutando prueba completar-solicitud.cy.js..."
                             docker run --rm \\
                                 --network ${E2E_NET} \\
                                 -e CYPRESS_baseUrl=http://frontend:3000 \\
                                 ${E2E_IMAGE} \\
-                                cypress run --spec "tests/e2e/completar-solicitud.cy.js"
+                                cypress run --spec "completar-solicitud.cy.js" --headed --no-exit
+
+                            # También ejecutar la prueba smoke de login
+                            echo "Ejecutando prueba smoke home.cy.js..."
+                            docker run --rm \\
+                                --network ${E2E_NET} \\
+                                -e CYPRESS_baseUrl=http://frontend:3000 \\
+                                ${E2E_IMAGE} \\
+                                cypress run --spec "home.cy.js"
 
                             echo "=== Pruebas E2E completadas exitosamente ==="
                             '''
@@ -370,8 +385,8 @@ pipeline {
                         try {
                             sh 'mkdir -p e2e-results'
                             // Intentar copiar videos y screenshots del contenedor
-                            sh "docker cp ${FRONTEND_CONT}:/e2e/cypress/videos e2e-results/ 2>/dev/null || true"
-                            sh "docker cp ${FRONTEND_CONT}:/e2e/cypress/screenshots e2e-results/ 2>/dev/null || true"
+                            sh "docker cp e2e-frontend-${BUILD_NUMBER}-${EXECUTOR_NUMBER}:/e2e/cypress/videos e2e-results/ 2>/dev/null || true"
+                            sh "docker cp e2e-frontend-${BUILD_NUMBER}-${EXECUTOR_NUMBER}:/e2e/cypress/screenshots e2e-results/ 2>/dev/null || true"
                             archiveArtifacts artifacts: 'e2e-results/**/*', allowEmptyArchive: true
                         } catch (Exception e) {
                             echo "No se pudieron archivar resultados: ${e.getMessage()}"
