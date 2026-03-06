@@ -25,7 +25,7 @@ Sigue estos pasos para levantar el entorno local:
 
 ## 1. Clonar el repositorio
 ```
-git clone https://github.com/tu-usuario/tramitrack.git
+git clone [https://github.com/tu-usuario/tramitrack.git](https://github.com/DiegoBranco/TramiTrack.git)
 cd tramitrack
 ```
 ## 2. Configurar variables de entorno
@@ -40,13 +40,18 @@ MONGO_PASSWORD=
 MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/tramitrack
 ```
 
-
-## 3. Levantar con Docker
-Ejecuta el siguiente comando para construir y levantar los contenedores:
+## 3. Levantar Aplicación
+Ejecuta el siguiente comando para construir y levantar los contenedores de la app:
 
 ```
-docker compose up --build
+pnpm dev
 ```
+En caso de querer usar jenkins se tiene que ejecutar es:
+
+```
+pnpm dev:jenkins
+```
+
 ---
 # Puntos de Acceso
 Una vez que los contenedores estén corriendo, podrás acceder a:
