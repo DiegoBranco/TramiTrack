@@ -239,7 +239,7 @@
                 {
                   "key": "comprobante",
                   "type": "file",
-                  "src": ["dummy.pdf"]
+                  "src": ["./fixtures/dummy.pdf"]
                 }
               ]
             },
