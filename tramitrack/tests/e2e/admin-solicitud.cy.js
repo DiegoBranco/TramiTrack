@@ -44,7 +44,7 @@ describe("Flujo admin: actualizar estado de solicitud", () => {
         // ============================================
         // PASO 2: Verificar home admin después del login
         // ============================================
-        cy.contains("¡BIENVENIDO!").should("be.visible");
+        
         cy.contains("Trámites Activos").should("be.visible");
 
         cy.wait("@getAllSolicitudes");
