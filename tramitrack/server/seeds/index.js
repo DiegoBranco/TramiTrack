@@ -96,11 +96,11 @@ const seedDatabase = async () => {
     if (tramiteConstancia && estudiante) {
       // Evitar duplicados: buscar una solicitud reciente del mismo estudiante y tipo
       const existeSol = await Solicitud.findOne({ estudiante_id: estudiante._id, tramiteType_id: tramiteConstancia._id });
-      if (!existeSol) {
+      
         const nueva = {
           estudiante_id: estudiante._id,
           tramiteType_id: tramiteConstancia._id,
-          estado: 'PENDIENTE',
+          estado: 'pendiente',
           observaciones: 'Solicitud de prueba generada por seed',
           datos_formulario: {
             nombre: estudiante.nombre,
@@ -109,16 +109,14 @@ const seedDatabase = async () => {
             correo: estudiante.correo,
             cuenta_bancaria: '11111111111111111111',
             referencia_pago: 'SEED-REF-0001',
-            monto: tramiteConstancia.costo || 10,
+            monto: 10000,
             fecha_pago: new Date(),
           },
         };
 
         await Solicitud.create(nueva);
         console.log('Solicitud de prueba creada para', estudiante.correo);
-      } else {
-        console.log('Ya existe una solicitud para ese estudiante y trámite; no se creó duplicado.');
-      }
+    
     } else {
       console.log('No se encontró usuario o tipo de trámite para crear la solicitud de seed.');
     }
