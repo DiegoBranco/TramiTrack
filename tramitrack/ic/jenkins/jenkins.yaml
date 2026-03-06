@@ -252,7 +252,7 @@ jobs:
                 remote {
                   url('https://github.com/DiegoBranco/TramiTrack.git')
                 }
-                branch('develop')
+                branch('test/jenkins-fluji-completo-e2e')
               }
             }
             scriptPath('tramitrack/Jenkinsfile')

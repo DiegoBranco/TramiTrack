@@ -212,6 +212,174 @@ pipeline {
             }
         }
         
+        stage('E2E Tests') {
+            steps {
+                script {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                        dir('tramitrack') {
+                            sh '''
+                            set -e
+
+                            # Configuración de nombres únicos
+                            E2E_NET="e2e-net-${BUILD_NUMBER}"
+                            RUN_SUFFIX="${BUILD_NUMBER}-${EXECUTOR_NUMBER}"
+                            MONGO_CONT="e2e-mongo-${RUN_SUFFIX}"
+                            API_CONT="e2e-api-${RUN_SUFFIX}"
+                            FRONTEND_CONT="e2e-frontend-${RUN_SUFFIX}"
+                            CI_LABEL="ci.tramitrack.e2e=true"
+
+                            # Limpiar contenedores antiguos
+                            OLD_CONTAINERS=$(docker ps -aq --filter "label=${CI_LABEL}" || true)
+                            if [ -n "${OLD_CONTAINERS}" ]; then
+                                docker rm -f ${OLD_CONTAINERS} >/dev/null 2>&1 || true
+                            fi
+
+                            OLD_NETWORKS=$(docker network ls -q --filter "label=${CI_LABEL}" || true)
+                            if [ -n "${OLD_NETWORKS}" ]; then
+                                docker network rm ${OLD_NETWORKS} >/dev/null 2>&1 || true
+                            fi
+
+                            # Función de limpieza
+                            cleanup() {
+                                echo "Limpiando contenedores E2E..."
+                                docker rm -f ${FRONTEND_CONT} ${API_CONT} ${MONGO_CONT} >/dev/null 2>&1 || true
+                                docker network rm ${E2E_NET} >/dev/null 2>&1 || true
+                            }
+                            trap cleanup EXIT
+
+                            # Construir imagen de Cypress
+                            echo "Construyendo imagen de E2E tests..."
+                            docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
+
+                            # Crear red aislada
+                            echo "Creando red Docker..."
+                            docker network create --label "${CI_LABEL}" ${E2E_NET}
+
+                            # ============================================
+                            # 1. LEVANTAR MONGODB
+                            # ============================================
+                            echo "Levantando MongoDB..."
+                            docker run -d --rm \\
+                                --name ${MONGO_CONT} \\
+                                --label "${CI_LABEL}" \\
+                                --network ${E2E_NET} \\
+                                --network-alias mongo \\
+                                mongo:4.4
+
+                            # Esperar a que MongoDB esté listo
+                            echo "Esperando MongoDB..."
+                            sleep 5
+
+                            # ============================================
+                            # 2. LEVANTAR BACKEND (usa imagen del stage anterior)
+                            # ============================================
+                            echo "Levantando Backend desde ${BACKEND_IMAGE}:latest..."
+                            docker run -d \\
+                                --name ${API_CONT} \\
+                                --label "${CI_LABEL}" \\
+                                --network ${E2E_NET} \\
+                                --network-alias api \\
+                                -e SERVER_PORT=3001 \\
+                                -e MONGO_URI=mongodb://mongo:27017/tramitrack \\
+                                -e NODE_ENV=test \\
+                                ${BACKEND_IMAGE}:latest
+
+                            # Esperar a que el backend esté listo (usando endpoint /)
+                            echo "Esperando Backend..."
+                            RETRIES=30
+                            COUNT=0
+                            until docker exec ${API_CONT} wget -q -T 2 -O /dev/null http://localhost:3001/; do
+                                COUNT=$((COUNT+1))
+                                if [ $COUNT -ge $RETRIES ]; then
+                                    echo "ERROR: Backend no responde después de $RETRIES intentos"
+                                    echo "=== Logs del backend ==="
+                                    docker logs ${API_CONT}
+                                    exit 1
+                                fi
+                                echo "Esperando backend... ($COUNT/$RETRIES)"
+                                sleep 2
+                            done
+                            echo "Backend listo ✓"
+
+                            # ============================================
+                            # 3. LEVANTAR FRONTEND (usa imagen del stage anterior)
+                            # ============================================
+                            echo "Levantando Frontend desde ${FRONTEND_IMAGE}:build..."
+                            docker run -d \\
+                                --name ${FRONTEND_CONT} \\
+                                --label "${CI_LABEL}" \\
+                                --network ${E2E_NET} \\
+                                --network-alias frontend \\
+                                -e VITE_API_URL=http://api:3001 \\
+                                ${FRONTEND_IMAGE}:build \\
+                                pnpm dev --host 0.0.0.0 --port 3000
+
+                            # Esperar a que el frontend esté listo
+                            echo "Esperando Frontend..."
+                            RETRIES=30
+                            COUNT=0
+                            until docker exec ${FRONTEND_CONT} wget -q -T 2 -O /dev/null http://localhost:3000; do
+                                COUNT=$((COUNT+1))
+                                if [ $COUNT -ge $RETRIES ]; then
+                                    echo "ERROR: Frontend no responde después de $RETRIES intentos"
+                                    echo "=== Logs del frontend ==="
+                                    docker logs ${FRONTEND_CONT}
+                                    exit 1
+                                fi
+                                echo "Esperando frontend... ($COUNT/$RETRIES)"
+                                sleep 2
+                            done
+                            echo "Frontend listo ✓"
+
+                            # Pequeña pausa para estabilidad
+                            sleep 3
+
+                            # ============================================
+                            # 4. EJECUTAR PRUEBAS E2E
+                            # ============================================
+                            echo "=== Ejecutando pruebas E2E ==="
+                            
+                            # Verificar estructura de archivos en la imagen
+                            echo "Verificando estructura de archivos en imagen E2E..."
+                            docker run --rm ${E2E_IMAGE} ls -la
+
+                            # Ejecutar la prueba específica
+                            # Nota: Como copiaste tests/e2e a /e2e/tests/e2e, la ruta completa es:
+                            docker run --rm \\
+                                --network ${E2E_NET} \\
+                                -e CYPRESS_baseUrl=http://frontend:3000 \\
+                                ${E2E_IMAGE} \\
+                                cypress run --spec "tests/e2e/completar-solicitud.cy.js"
+
+                            echo "=== Pruebas E2E completadas exitosamente ==="
+                            '''
+                        }
+                    }
+                }
+            }
+            post {
+                unstable {
+                    echo 'AVISO: Algunas pruebas E2E fallaron'
+                }
+                failure {
+                    echo 'ERROR: Las pruebas E2E no pudieron ejecutarse'
+                }
+                always {
+                    // Archivar resultados (videos y screenshots)
+                    script {
+                        try {
+                            sh 'mkdir -p e2e-results'
+                            // Intentar copiar videos y screenshots del contenedor
+                            sh "docker cp ${FRONTEND_CONT}:/e2e/cypress/videos e2e-results/ 2>/dev/null || true"
+                            sh "docker cp ${FRONTEND_CONT}:/e2e/cypress/screenshots e2e-results/ 2>/dev/null || true"
+                            archiveArtifacts artifacts: 'e2e-results/**/*', allowEmptyArchive: true
+                        } catch (Exception e) {
+                            echo "No se pudieron archivar resultados: ${e.getMessage()}"
+                        }
+                    }
+                }
+            }
+        }
         
         /*
         
