@@ -257,9 +257,10 @@ pipeline {
                                 -e VITE_API_URL=http://backend-e2e:3001 \
                                 ${FRONTEND_IMAGE}:build pnpm dev --host 0.0.0.0 --port 3000
 
+                            # Run the completar spec first, then admin spec so admin reuses created solicitud
                             docker run --rm --network e2e-net \
                                 -e CYPRESS_baseUrl=http://frontend-e2e:3000 \
-                                ${E2E_IMAGE}
+                                ${E2E_IMAGE} --spec "tests/e2e/completar-solicitud.cy.js,tests/e2e/admin-solicitud.cy.js"
                         '''
                         }
                     }
