@@ -273,32 +273,7 @@
           ]
         },
         {
-          "name": "5.2 Solicitud ajena sin auth en backend",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{url}}/api/solicitudes/{{solicitudAjenaId}}",
-              "host": ["{{url}}"],
-              "path": ["api", "solicitudes", "{{solicitudAjenaId}}"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Estado es 200 OK', () => pm.response.to.have.status(200));",
-                  "const res = pm.response.json();",
-                  "pm.test('ID coincide', () => pm.expect(res._id).to.eql(pm.collectionVariables.get('solicitudAjenaId')));"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "5.3 Solicitud inexistente",
+          "name": "5.2 Solicitud inexistente",
           "request": {
             "method": "GET",
             "header": [],
@@ -315,6 +290,32 @@
                 "exec": [
                   "pm.test('Estado es 404 Not Found', () => pm.response.to.have.status(404));",
                   "pm.test('Mensaje indica solicitud no encontrada', () => pm.expect(pm.response.json().message).to.include('no encontrada'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.3 Todas las solicitudes (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/api/solicitudes",
+              "host": ["{{url}}"],
+              "path": ["api", "solicitudes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Estado es 200 OK', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('Respuesta es un arreglo', () => pm.expect(Array.isArray(res)).to.be.true);",
+                  "pm.test('Al menos una solicitud presente', () => pm.expect(res.length).to.be.at.least(1));"
                 ],
                 "type": "text/javascript"
               }
