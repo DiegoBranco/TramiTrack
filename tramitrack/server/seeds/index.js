@@ -100,7 +100,7 @@ const seedDatabase = async () => {
         const nueva = {
           estudiante_id: estudiante._id,
           tramiteType_id: tramiteConstancia._id,
-          estado: 'pendiente',
+          estado: 'PENDIENTE',
           observaciones: 'Solicitud de prueba generada por seed',
           datos_formulario: {
             nombre: estudiante.nombre,
