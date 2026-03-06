@@ -248,11 +248,11 @@ pipeline {
                             }
                             trap cleanup EXIT
 
-                            # Verificar que los archivos de prueba existen
+                            # Verificar archivos
                             echo "Verificando archivos de prueba en tests/e2e/:"
                             ls -la tests/e2e/
 
-                            # Construir imagen de Cypress con el Dockerfile corregido
+                            # Construir imagen de Cypress
                             echo "Construyendo imagen de E2E tests..."
                             docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} tests/e2e
 
@@ -271,7 +271,6 @@ pipeline {
                                 --network-alias mongo \\
                                 mongo:4.4
 
-                            # Esperar a que MongoDB esté listo
                             echo "Esperando MongoDB..."
                             sleep 5
 
@@ -289,11 +288,11 @@ pipeline {
                                 -e NODE_ENV=test \\
                                 ${BACKEND_IMAGE}:latest
 
-                            # Esperar a que el backend esté listo (endpoint /)
+                            # Esperar a que el backend esté listo
                             echo "Esperando Backend..."
                             RETRIES=30
                             COUNT=0
-                            until docker exec ${API_CONT} wget -q -T 2 -O /dev/null http://localhost:3001/; do
+                            until docker exec ${API_CONT} wget -q -T 2 -O /dev/null http://localhost:3001/ 2>/dev/null; do
                                 COUNT=$((COUNT+1))
                                 if [ $COUNT -ge $RETRIES ]; then
                                     echo "ERROR: Backend no responde después de $RETRIES intentos"
@@ -309,9 +308,13 @@ pipeline {
                             echo "Backend listo ✓"
 
                             # ============================================
-                            # 3. LEVANTAR FRONTEND
+                            # 3. LEVANTAR FRONTEND (con mejor health check)
                             # ============================================
                             echo "Levantando Frontend desde ${FRONTEND_IMAGE}:build..."
+                            
+                            # Primero, verificar si wget está instalado, si no, instalar
+                            docker run --rm ${FRONTEND_IMAGE}:build sh -c "which wget || apk add --no-cache wget" || true
+                            
                             docker run -d \\
                                 --name ${FRONTEND_CONT} \\
                                 --label "${CI_LABEL}" \\
@@ -319,13 +322,31 @@ pipeline {
                                 --network-alias frontend \\
                                 -e VITE_API_URL=http://api:3001 \\
                                 ${FRONTEND_IMAGE}:build \\
-                                pnpm dev --host 0.0.0.0 --port 3000
+                                sh -c "apk add --no-cache wget && pnpm dev --host 0.0.0.0 --port 3000"
 
-                            # Esperar a que el frontend esté listo
+                            # Esperar a que el frontend esté listo (con múltiples estrategias)
                             echo "Esperando Frontend..."
                             RETRIES=30
                             COUNT=0
-                            until docker exec ${FRONTEND_CONT} wget -q -T 2 -O /dev/null http://localhost:3000; do
+                            
+                            # Estrategia 1: Esperar logs de Vite
+                            echo "Esperando a que Vite compile..."
+                            sleep 5  # Tiempo inicial para compilación
+                            
+                            # Estrategia 2: Verificar con wget (si está instalado)
+                            while [ $COUNT -lt $RETRIES ]; do
+                                if docker exec ${FRONTEND_CONT} wget -q -T 2 -O /dev/null http://localhost:3000 2>/dev/null; then
+                                    echo "Frontend responde con wget ✓"
+                                    break
+                                fi
+                                
+                                # Estrategia 3: Verificar logs
+                                if docker logs ${FRONTEND_CONT} 2>&1 | grep -q "ready in"; then
+                                    echo "Frontend listo según logs ✓"
+                                    sleep 2  # Dar tiempo extra después de "ready"
+                                    break
+                                fi
+                                
                                 COUNT=$((COUNT+1))
                                 if [ $COUNT -ge $RETRIES ]; then
                                     echo "ERROR: Frontend no responde después de $RETRIES intentos"
@@ -336,9 +357,14 @@ pipeline {
                                 echo "Esperando frontend... ($COUNT/$RETRIES)"
                                 sleep 2
                             done
+                            
+                            # Verificación final
+                            echo "Verificando que el frontend está accesible desde la red..."
+                            docker run --rm --network ${E2E_NET} curlimages/curl:latest curl -s -o /dev/null -w "%{http_code}" http://frontend:3000 || true
+                            
                             echo "Frontend listo ✓"
 
-                            # Pequeña pausa para estabilidad
+                            # Pausa adicional para asegurar estabilidad
                             sleep 3
 
                             # ============================================
@@ -346,11 +372,11 @@ pipeline {
                             # ============================================
                             echo "=== Ejecutando pruebas E2E ==="
                             
-                            # Verificar estructura de archivos en la imagen
+                            # Verificar estructura
                             echo "Contenido de la imagen E2E:"
                             docker run --rm ${E2E_IMAGE} ls -la
 
-                            # Ejecutar la prueba específica
+                            # Ejecutar pruebas
                             echo "Ejecutando prueba completar-solicitud.cy.js..."
                             docker run --rm \\
                                 --network ${E2E_NET} \\
@@ -358,7 +384,6 @@ pipeline {
                                 ${E2E_IMAGE} \\
                                 cypress run --spec "completar-solicitud.cy.js" --headed --no-exit
 
-                            # También ejecutar la prueba smoke de login
                             echo "Ejecutando prueba smoke home.cy.js..."
                             docker run --rm \\
                                 --network ${E2E_NET} \\
@@ -380,11 +405,10 @@ pipeline {
                     echo 'ERROR: Las pruebas E2E no pudieron ejecutarse'
                 }
                 always {
-                    // Archivar resultados (videos y screenshots)
+                    // Archivar resultados
                     script {
                         try {
                             sh 'mkdir -p e2e-results'
-                            // Intentar copiar videos y screenshots del contenedor
                             sh "docker cp e2e-frontend-${BUILD_NUMBER}-${EXECUTOR_NUMBER}:/e2e/cypress/videos e2e-results/ 2>/dev/null || true"
                             sh "docker cp e2e-frontend-${BUILD_NUMBER}-${EXECUTOR_NUMBER}:/e2e/cypress/screenshots e2e-results/ 2>/dev/null || true"
                             archiveArtifacts artifacts: 'e2e-results/**/*', allowEmptyArchive: true
