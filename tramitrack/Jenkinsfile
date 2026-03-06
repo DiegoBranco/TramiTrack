@@ -212,9 +212,6 @@ pipeline {
             }
         }
         
-        
-        /*
-        
         stage('E2E Tests') {
             steps {
                 script {
@@ -264,7 +261,7 @@ pipeline {
                 echo 'AVISO: No se ejecutaron pruebas de Performance o los scripts de JMeter faltan'
                 }
             }
-        }*/
+        }
         
     }
     post {
