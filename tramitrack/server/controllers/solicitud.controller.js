@@ -32,6 +32,11 @@ exports.create = async (req, res) => {
         message: `Tipo de trámite no encontrado con ID: ${tramiteType_id}`,
       });
 
+    // Requerir comprobante (archivo) para crear la solicitud
+    if (!req.file) {
+      return res.status(400).json({ message: "Se requiere un comprobante (archivo) para crear la solicitud" });
+    }
+
     // Calcular fecha estimada sumando días hábiles
     const fecha_estimada = new Date();
     fecha_estimada.setDate(fecha_estimada.getDate() + tipo.dias_habiles);
