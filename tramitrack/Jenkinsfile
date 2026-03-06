@@ -218,18 +218,48 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         dir('tramitrack'){
                         sh '''
-                        cleanup() {
-                            docker rm -f frontend-e2e >/dev/null 2>&1 || true
-                            docker network rm e2e-net >/dev/null 2>&1 || true
-                        }
+                            cleanup() {
+                                docker rm -f frontend-e2e backend-e2e mongo-e2e >/dev/null 2>&1 || true
+                                docker network rm e2e-net >/dev/null 2>&1 || true
+                            }
 
-                        cleanup
-                        trap cleanup EXIT
+                            cleanup
+                            trap cleanup EXIT
 
-                        docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} .
-                        docker network create e2e-net
-                        docker run -d --rm --name frontend-e2e --network e2e-net ${FRONTEND_IMAGE}:build pnpm dev --host 0.0.0.0 --port 3000
-                        docker run --rm --network e2e-net -e CYPRESS_baseUrl=http://frontend-e2e:3000 ${E2E_IMAGE}
+                            docker build -f tests/e2e/Dockerfile.e2e -t ${E2E_IMAGE} .
+                            docker network create e2e-net
+
+                            docker run -d --rm --name mongo-e2e --network e2e-net mongo:4.4
+                            docker run -d --rm --name backend-e2e --network e2e-net \
+                                -e SERVER_PORT=3001 \
+                                -e MONGO_URI=mongodb://mongo-e2e:27017/tramitrack?authSource=admin \
+                                ${BACKEND_IMAGE}:latest
+
+                            echo "Waiting for backend to become healthy"
+                            RETRIES=30
+                            COUNT=0
+                            while [ "$COUNT" -lt "$RETRIES" ]; do
+                                    if docker exec backend-e2e sh -c 'wget -q -T 2 -O /dev/null http://127.0.0.1:3001/' >/dev/null 2>&1; then
+                                            echo "backend-e2e is responding"
+                                            break
+                                    fi
+                                    COUNT=$((COUNT+1))
+                                    sleep 2
+                            done
+                            if [ "$COUNT" -ge "$RETRIES" ]; then
+                                    echo "ERROR: backend-e2e did not become healthy after ${RETRIES} attempts"
+                                    docker logs backend-e2e || true
+                                    docker logs mongo-e2e || true
+                                    exit 1
+                            fi
+
+                            docker run -d --rm --name frontend-e2e --network e2e-net \
+                                -e VITE_API_URL=http://backend-e2e:3001 \
+                                ${FRONTEND_IMAGE}:build pnpm dev --host 0.0.0.0 --port 3000
+
+                            docker run --rm --network e2e-net \
+                                -e CYPRESS_baseUrl=http://frontend-e2e:3000 \
+                                ${E2E_IMAGE}
                         '''
                         }
                     }
