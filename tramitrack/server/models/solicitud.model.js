@@ -62,6 +62,10 @@ const solicitudSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "PaymentStub",
     },
+    constancia_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Constancia",
+    },
     documento_final: { type: String },
   },
   { timestamps: true },

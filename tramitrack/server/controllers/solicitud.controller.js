@@ -1,6 +1,7 @@
 const Solicitud = require("../models/solicitud.model");
 const TramiteType = require("../models/tramiteType.model");
 const PaymentStub = require("../models/paymentStub.model");
+const Constancia = require("../models/constancia.model");
 
 // Estudiante crea una solicitud
 exports.create = async (req, res) => {
@@ -34,7 +35,12 @@ exports.create = async (req, res) => {
 
     // Requerir comprobante (archivo) para crear la solicitud
     if (!req.file) {
-      return res.status(400).json({ message: "Se requiere un comprobante (archivo) para crear la solicitud" });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Se requiere un comprobante (archivo) para crear la solicitud",
+        });
     }
 
     // Calcular fecha estimada sumando días hábiles
@@ -100,7 +106,8 @@ exports.getById = async (req, res) => {
   try {
     const solicitud = await Solicitud.findById(req.params.id)
       .populate("tramiteType_id")
-      .populate("comprobante_id");
+      .populate("comprobante_id")
+      .populate("constancia_id");
     if (!solicitud)
       return res.status(404).json({ message: "Solicitud no encontrada" });
     res.json(solicitud);
@@ -132,30 +139,22 @@ exports.updateEstado = async (req, res) => {
   try {
     const { estado, observaciones } = req.body;
     const actual = await Solicitud.findById(req.params.id);
-    if (!actual){
+    if (!actual) {
       return res.status(404).json({ message: "Solicitud no encontrada" });
     }
-    if (estado && !["pendiente", "en_proceso", "completado", "rechazado", "entregado"].includes(estado)) {
+    if (
+      estado &&
+      ![
+        "pendiente",
+        "en_proceso",
+        "completado",
+        "rechazado",
+        "entregado",
+      ].includes(estado)
+    ) {
       return res.status(400).json({ message: "Estado inválido" });
     }
-    //revisamos que el cambio de estado sea lógico (ej: no pasar de pendiente a completado sin pasar por en_proceso)
-    switch (actual.estado) {
-      case "pendiente":
-        if(estado !== "en_proceso" ){
-          return res.status(400).json({ message: "Solo se puede pasar de pendiente a en_proceso" });
-        }          
-        break;
-      case "en_proceso":
-        if(estado !== "completado" && estado !== "rechazado"){
-          return res.status(400).json({ message: "Solo se puede pasar de en_proceso a completado o rechazado" });
-        }
-        break;
-    
-      default:
-        return res.status(400).json({ message: `No se puede cambiar el estado desde ${actual.estado}` });
-        break;
-    }
-    
+
     const solicitud = await Solicitud.findByIdAndUpdate(
       req.params.id,
       { estado, observaciones },
@@ -184,5 +183,73 @@ exports.uploadDocumentoFinal = async (req, res) => {
     res.json(solicitud);
   } catch (error) {
     res.status(500).json({ message: "Error subiendo documento final", error });
+  }
+};
+
+// Admin sube una constancia para la solicitud
+exports.uploadConstancia = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No se subio ningun archivo" });
+    }
+
+    const solicitud = await Solicitud.findById(req.params.id);
+    if (!solicitud) {
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+
+    const nuevaConstancia = new Constancia({
+      originalName: req.file.originalname,
+      filename: req.file.filename,
+      ruta_constancia: req.file.path,
+      solicitud_id: solicitud._id,
+    });
+
+    await nuevaConstancia.save();
+
+    solicitud.constancia_id = nuevaConstancia._id;
+    if (!["completado", "entregado"].includes(solicitud.estado)) {
+      solicitud.estado = "completado";
+    }
+    await solicitud.save();
+
+    const actualizada = await Solicitud.findById(solicitud._id)
+      .populate("tramiteType_id")
+      .populate("comprobante_id")
+      .populate("constancia_id");
+
+    return res.status(201).json(actualizada);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error subiendo constancia", error: error.message });
+  }
+};
+
+// Estudiante descarga constancia y la solicitud pasa a entregado
+exports.downloadConstancia = async (req, res) => {
+  try {
+    const solicitud = await Solicitud.findById(req.params.id).populate(
+      "constancia_id",
+    );
+    if (!solicitud) {
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+
+    const constancia = solicitud.constancia_id;
+    if (!constancia) {
+      return res.status(404).json({ message: "Constancia no encontrada" });
+    }
+
+    if (solicitud.estado !== "entregado") {
+      solicitud.estado = "entregado";
+      await solicitud.save();
+    }
+
+    return res.download(constancia.ruta_constancia, constancia.originalName);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error descargando constancia", error: error.message });
   }
 };

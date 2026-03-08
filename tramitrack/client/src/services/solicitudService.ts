@@ -42,6 +42,7 @@ export interface TramiteResponse {
   datos_formulario: DatosFormulario;
   observaciones?: string;
   comprobante_id?: any;
+  constancia_id?: any;
   documento_final?: string;
 }
 
@@ -123,9 +124,15 @@ class SolicitudService {
   /**
    * Actualizar estado y observaciones (admin)
    */
-  async updateEstado(id: string, payload: { estado: string; observaciones: string }) {
+  async updateEstado(
+    id: string,
+    payload: { estado: string; observaciones: string },
+  ) {
     try {
-      const response = await axios.patch(`${this.baseUrl}/${id}/estado`, payload);
+      const response = await axios.patch(
+        `${this.baseUrl}/${id}/estado`,
+        payload,
+      );
       return response.data;
     } catch (error) {
       console.error("Error en solicitudService.updateEstado:", error);
@@ -140,14 +147,47 @@ class SolicitudService {
     try {
       const formData = new FormData();
       formData.append("documentoFinal", file);
-      const response = await axios.post(`${this.baseUrl}/${id}/documento`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.post(
+        `${this.baseUrl}/${id}/documento`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
       return response.data;
     } catch (error) {
       console.error("Error en solicitudService.uploadDocumentoFinal:", error);
       throw error;
     }
+  }
+
+  /**
+   * Subir constancia del tramite (admin)
+   */
+  async uploadConstancia(id: string, file: File) {
+    try {
+      const formData = new FormData();
+      formData.append("constancia", file);
+      const response = await axios.post(
+        `${this.baseUrl}/${id}/constancia`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error en solicitudService.uploadConstancia:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * URL para descarga de constancia (estudiante).
+   * El backend actualiza el estado a entregado al descargar.
+   */
+  getConstanciaDownloadUrl(id: string): string {
+    return `${this.baseUrl}/${id}/constancia/download`;
   }
 
   /**
