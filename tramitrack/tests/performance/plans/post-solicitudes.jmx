@@ -153,9 +153,9 @@
           <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">true</boolProp>
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="dummy-jmeter.pdf" elementType="HTTPFileArg">
+              <elementProp name="../fixtures/dummy.pdf" elementType="HTTPFileArg">
                 <stringProp name="File.mimetype">application/pdf</stringProp>
-                <stringProp name="File.path">dummy-jmeter.pdf</stringProp>
+                <stringProp name="File.path">../fixtures/dummy.pdf</stringProp>
                 <stringProp name="File.paramname">comprobante</stringProp>
               </elementProp>
             </collectionProp>
