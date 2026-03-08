@@ -52,6 +52,7 @@
           <v-btn
             color="secondary"
             class="text-none text-white btn-secondary"
+            @click="$router.push('/admin-metricas')"
           >
             Ir a Estadísticas
           </v-btn>

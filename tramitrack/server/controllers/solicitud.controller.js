@@ -11,7 +11,7 @@ exports.create = async (req, res) => {
     if (typeof datos_formulario === "string") {
       try {
         datos_formulario = JSON.parse(datos_formulario);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // ensure proper types
@@ -127,12 +127,56 @@ exports.getAll = async (req, res) => {
   }
 };
 
+// Admin obtiene métricas para el Dashboard
+exports.getMetricas = async (req, res) => {
+  try {
+    // 1. Solicitudes por estado
+    const metricasEstados = await Solicitud.aggregate([
+      { $group: { _id: "$estado", count: { $sum: 1 } } }
+    ]);
+
+    // 2. Solicitudes por tipo de trámite (relacionado con TramiteType)
+    const metricasTiposRaw = await Solicitud.aggregate([
+      { $group: { _id: "$tramiteType_id", count: { $sum: 1 } } }
+    ]);
+
+    // Poblar los nombres de los trámites
+    const metricasTipos = await TramiteType.populate(metricasTiposRaw, { path: "_id", select: "nombre" });
+
+    // 3. Solicitudes recientes (últimos 30 días) agrupadas por fecha
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hace30Dias.getDate() - 30);
+
+    const metricasTiempo = await Solicitud.aggregate([
+      { $match: { createdAt: { $gte: hace30Dias } } },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } } // Ordenar por fecha ascendente
+    ]);
+
+    res.json({
+      estados: metricasEstados,
+      tipos: metricasTipos,
+      tiempo: metricasTiempo
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error obteniendo métricas administrativas", error });
+  }
+};
+
 // Admin cambia estado + observaciones
 exports.updateEstado = async (req, res) => {
   try {
     const { estado, observaciones } = req.body;
     const actual = await Solicitud.findById(req.params.id);
-    if (!actual){
+    if (!actual) {
       return res.status(404).json({ message: "Solicitud no encontrada" });
     }
     if (estado && !["pendiente", "en_proceso", "completado", "rechazado", "entregado"].includes(estado)) {
@@ -141,21 +185,21 @@ exports.updateEstado = async (req, res) => {
     //revisamos que el cambio de estado sea lógico (ej: no pasar de pendiente a completado sin pasar por en_proceso)
     switch (actual.estado) {
       case "pendiente":
-        if(estado !== "en_proceso" ){
+        if (estado !== "en_proceso") {
           return res.status(400).json({ message: "Solo se puede pasar de pendiente a en_proceso" });
-        }          
+        }
         break;
       case "en_proceso":
-        if(estado !== "completado" && estado !== "rechazado"){
+        if (estado !== "completado" && estado !== "rechazado") {
           return res.status(400).json({ message: "Solo se puede pasar de en_proceso a completado o rechazado" });
         }
         break;
-    
+
       default:
         return res.status(400).json({ message: `No se puede cambiar el estado desde ${actual.estado}` });
         break;
     }
-    
+
     const solicitud = await Solicitud.findByIdAndUpdate(
       req.params.id,
       { estado, observaciones },
