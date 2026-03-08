@@ -60,7 +60,9 @@
             </h2>
             <v-row dense>
               <v-col cols="12" sm="6">
-                <p class="text-body-2 font-weight-bold mb-0">Nombre del Trámite:</p>
+                <p class="text-body-2 font-weight-bold mb-0">
+                  Nombre del Trámite:
+                </p>
                 <p class="text-body-2 text-grey-darken-1 mb-2">
                   {{ detalle.tramiteType_id?.nombre || "No disponible" }}
                 </p>
@@ -71,7 +73,9 @@
                   {{ formatDate(detalle.fecha_estimada) }}
                 </p>
 
-                <p class="text-body-2 font-weight-bold mb-0">Fecha solicitada:</p>
+                <p class="text-body-2 font-weight-bold mb-0">
+                  Fecha solicitada:
+                </p>
                 <p class="text-body-2 text-grey-darken-1 mb-0">
                   {{ formatDate(detalle.fecha_solicitud) }}
                 </p>
@@ -111,7 +115,9 @@
               <v-col cols="12" sm="6" class="pb-2">
                 <div class="info-grid-item">
                   <v-avatar color="accent" size="30">
-                    <v-icon size="16" color="white">mdi-credit-card-outline</v-icon>
+                    <v-icon size="16" color="white"
+                      >mdi-credit-card-outline</v-icon
+                    >
                   </v-avatar>
                   <div>
                     <p class="label">Cta. de origen</p>
@@ -199,21 +205,31 @@
 
         <!-- ACCIONES -->
         <v-col cols="12" md="5">
-          <v-card class="pa-4 rounded-lg h-100 d-flex flex-column" elevation="1">
+          <v-card
+            class="pa-4 rounded-lg h-100 d-flex flex-column"
+            elevation="1"
+          >
             <h2 class="font-bitter text-subtitle-1 font-weight-bold mb-3">
               Acciones
             </h2>
             <div class="d-flex flex-column ga-3 my-auto">
+              <input
+                ref="constanciaInput"
+                type="file"
+                accept="application/pdf"
+                class="d-none"
+                @change="onConstanciaSelected"
+              />
               <v-btn
                 block
-                :color="['completado', 'entregado'].includes(form.estado) ? 'primary' : 'grey-darken-1'"
-                :variant="['completado', 'entregado'].includes(form.estado) ? 'flat' : 'outlined'"
-                :disabled="!['completado', 'entregado'].includes(form.estado)"
+                color="primary"
+                variant="flat"
                 class="text-none btn-border-bold"
-                :class="{ 'text-white': ['completado', 'entregado'].includes(form.estado) }"
+                :class="{ 'text-white': true }"
+                :loading="uploadingConstancia"
                 @click="generarTramite"
               >
-                Generar {{ detalle?.tramiteType_id?.nombre || 'Trámite' }}
+                Subir constancia
               </v-btn>
               <v-btn
                 block
@@ -260,6 +276,15 @@
         Volver a Inicio
       </v-btn>
     </template>
+
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+      location="bottom right"
+    >
+      {{ snackbar.message }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -277,7 +302,18 @@ const router = useRouter();
 const detalle = ref<TramiteResponse | null>(null);
 const loading = ref(false);
 const saving = ref(false);
+const uploadingConstancia = ref(false);
 const error = ref<string | null>(null);
+const constanciaInput = ref<HTMLInputElement | null>(null);
+const snackbar = ref<{
+  show: boolean;
+  message: string;
+  color: "success" | "error";
+}>({
+  show: false,
+  message: "",
+  color: "success",
+});
 
 const form = ref({
   observaciones: "",
@@ -318,11 +354,7 @@ const comprobantePath = computed(() => {
   return comprobante?.ruta_comprobante || "";
 });
 
-const downloadablePath = computed(
-  () => detalle.value?.documento_final || comprobantePath.value || "",
-);
-
-const hasDownloadableDocument = computed(() => !!downloadablePath.value);
+const hasDownloadableDocument = computed(() => !!comprobantePath.value);
 const cuentaOrigen = computed(
   () => detalle.value?.datos_formulario?.cuenta_bancaria || "N/A",
 );
@@ -389,8 +421,8 @@ const saveCambios = async () => {
 };
 
 const downloadDocumento = () => {
-  if (!downloadablePath.value) return;
-  const path = normalizeFilePath(downloadablePath.value);
+  if (!comprobantePath.value) return;
+  const path = normalizeFilePath(comprobantePath.value);
   const url = `${import.meta.env.VITE_API_URL || ""}${path}`;
   window.open(url, "_blank");
 };
@@ -401,12 +433,36 @@ const sendNotification = () => {
 };
 
 const generarTramite = async () => {
-  // TODO: integrar generación del documento del trámite
-  console.log("Generando trámite:", tramiteId.value);
+  constanciaInput.value?.click();
+};
 
-  // Al generar, pasar automáticamente a "entregado" para que el estudiante pueda descargar
-  form.value.estado = "entregado";
-  await saveCambios();
+const onConstanciaSelected = async (event: Event) => {
+  if (!tramiteId.value) return;
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  uploadingConstancia.value = true;
+  try {
+    await solicitudService.uploadConstancia(tramiteId.value, file);
+    snackbar.value = {
+      show: true,
+      message: "Constancia subida con exito.",
+      color: "success",
+    };
+    await loadDetalle();
+  } catch (err) {
+    console.error("Error subiendo constancia:", err);
+    error.value = "No se pudo subir la constancia.";
+    snackbar.value = {
+      show: true,
+      message: "Error al subir la constancia.",
+      color: "error",
+    };
+  } finally {
+    uploadingConstancia.value = false;
+    input.value = "";
+  }
 };
 
 watch(

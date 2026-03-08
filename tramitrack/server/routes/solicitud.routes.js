@@ -15,5 +15,11 @@ router.post(
   upload.single("documentoFinal"),
   controller.uploadDocumentoFinal,
 );
+router.post(
+  "/:id/constancia",
+  upload.single("constancia"),
+  controller.uploadConstancia,
+);
+router.get("/:id/constancia/download", controller.downloadConstancia);
 
 module.exports = router;

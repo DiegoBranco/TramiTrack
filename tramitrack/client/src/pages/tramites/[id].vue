@@ -210,25 +210,19 @@
               <!-- Acciones -->
               <div class="d-flex flex-column ga-2">
                 <v-btn
-                  :color="
-                    ['entregado', 'completado'].includes(tramite.estado)
-                      ? 'primary'
-                      : 'grey-darken-1'
-                  "
-                  :variant="
-                    ['entregado', 'completado'].includes(tramite.estado)
-                      ? 'flat'
-                      : 'outlined'
-                  "
+                  :color="hasDownloadableDocument ? 'primary' : 'grey-darken-1'"
+                  :variant="hasDownloadableDocument ? 'flat' : 'outlined'"
                   prepend-icon="mdi-download"
                   block
                   size="small"
-                  :disabled="
-                    !['entregado', 'completado'].includes(tramite.estado)
-                  "
+                  :disabled="!hasDownloadableDocument"
                   @click="descargarDocumentoFinal"
                 >
-                  Descargar {{ tramite.tramiteType_id?.nombre || "Documento" }}
+                  {{
+                    tieneConstancia
+                      ? `Descargar ${tramite.tramiteType_id?.nombre || "constancia"}`
+                      : `Descargar ${tramite.tramiteType_id?.nombre || "Documento"}`
+                  }}
                 </v-btn>
 
                 <v-btn
@@ -541,6 +535,16 @@ const tiempoRestanteColor = computed(() => {
   return "text-success";
 });
 
+const tieneConstancia = computed(() => {
+  if (!tramite.value?.constancia_id) return false;
+  if (typeof tramite.value.constancia_id === "string") return true;
+  return Boolean((tramite.value.constancia_id as any)?.ruta_constancia);
+});
+
+const hasDownloadableDocument = computed(
+  () => tieneConstancia.value || Boolean(tramite.value?.documento_final),
+);
+
 // Definir tipo para los items del timeline
 type TimelineItem = { color: string; fecha: string | null };
 
@@ -628,7 +632,20 @@ const descargarComprobante = () => {
 
 // Descargar documento final del trámite
 const descargarDocumentoFinal = () => {
-  if (!tramite.value?.documento_final) return;
+  if (!tramite.value) return;
+
+  if (tieneConstancia.value) {
+    const url = solicitudService.getConstanciaDownloadUrl(tramite.value._id);
+    window.open(url, "_blank");
+
+    // Refresca el detalle para reflejar estado entregado luego de descargar.
+    setTimeout(() => {
+      loadTramite();
+    }, 600);
+    return;
+  }
+
+  if (!tramite.value.documento_final) return;
   const filePath = tramite.value.documento_final;
   const marker = "/uploads/";
   const idx = filePath.indexOf(marker);
