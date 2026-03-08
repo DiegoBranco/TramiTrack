@@ -3,6 +3,38 @@ const TramiteType = require("../models/tramiteType.model");
 const PaymentStub = require("../models/paymentStub.model");
 const Constancia = require("../models/constancia.model");
 
+const parseLooseObjectString = (raw) => {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return null;
+
+  const body = trimmed.slice(1, -1).trim();
+  if (!body) return {};
+
+  const out = {};
+  for (const token of body.split(",")) {
+    const idx = token.indexOf(":");
+    if (idx === -1) continue;
+
+    const key = token
+      .slice(0, idx)
+      .trim()
+      .replace(/^['\"]|['\"]$/g, "");
+    let value = token
+      .slice(idx + 1)
+      .trim()
+      .replace(/^['\"]|['\"]$/g, "");
+
+    if (/^-?\d+(\.\d+)?$/.test(value)) {
+      value = Number(value);
+    }
+
+    if (key) out[key] = value;
+  }
+
+  return Object.keys(out).length ? out : null;
+};
+
 // Estudiante crea una solicitud
 exports.create = async (req, res) => {
   try {
@@ -12,7 +44,11 @@ exports.create = async (req, res) => {
     if (typeof datos_formulario === "string") {
       try {
         datos_formulario = JSON.parse(datos_formulario);
-      } catch (e) { }
+      } catch (e) {
+        // Multipart clients can send object-like strings without strict JSON quotes.
+        const looseParsed = parseLooseObjectString(datos_formulario);
+        if (looseParsed) datos_formulario = looseParsed;
+      }
     }
 
     // ensure proper types
