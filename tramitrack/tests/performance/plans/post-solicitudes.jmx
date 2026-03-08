@@ -7,22 +7,22 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="host" elementType="Argument">
             <stringProp name="Argument.name">host</stringProp>
-            <stringProp name="Argument.value">localhost</stringProp>
+            <stringProp name="Argument.value">${__P(host,localhost)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="port" elementType="Argument">
             <stringProp name="Argument.name">port</stringProp>
-            <stringProp name="Argument.value">3001</stringProp>
+            <stringProp name="Argument.value">${__P(port,3001)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="userId" elementType="Argument">
             <stringProp name="Argument.name">userId</stringProp>
-            <stringProp name="Argument.value">69a11654a2771622fafe4e2b</stringProp>
+            <stringProp name="Argument.value">69aa5075de0552c8b3aef62e</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="tramiteId" elementType="Argument">
             <stringProp name="Argument.name">tramiteId</stringProp>
-            <stringProp name="Argument.value">69a11655a2771622fafe4e3a</stringProp>
+            <stringProp name="Argument.value">69aa5075de0552c8b3aef63d</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -153,7 +153,7 @@
           <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">true</boolProp>
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="../fixtures/dummy.pdf" elementType="HTTPFileArg">
+              <elementProp name="dummy.pdf" elementType="HTTPFileArg">
                 <stringProp name="File.mimetype">application/pdf</stringProp>
                 <stringProp name="File.path">../fixtures/dummy.pdf</stringProp>
                 <stringProp name="File.paramname">comprobante</stringProp>
@@ -179,7 +179,7 @@
               </elementProp>
               <elementProp name="datos_formulario" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;nombre&quot;: &quot;Prueba Archivo Carga&quot;}</stringProp>
+                <stringProp name="Argument.value">{&quot;nombre&quot;:&quot;JMeter&quot;,&quot;apellido&quot;:&quot;Carga&quot;,&quot;cedula&quot;:&quot;29123456&quot;,&quot;correo&quot;:&quot;jmeter@example.com&quot;,&quot;cuenta_bancaria&quot;:&quot;11111111111111111111&quot;,&quot;referencia_pago&quot;:&quot;JMETER-REF-0001&quot;,&quot;monto&quot;:10000}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 <stringProp name="Argument.name">datos_formulario</stringProp>
