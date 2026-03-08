@@ -12,7 +12,7 @@ exports.create = async (req, res) => {
     if (typeof datos_formulario === "string") {
       try {
         datos_formulario = JSON.parse(datos_formulario);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // ensure proper types
@@ -131,6 +131,50 @@ exports.getAll = async (req, res) => {
     res.json(solicitudes);
   } catch (error) {
     res.status(500).json({ message: "Error obteniendo solicitudes", error });
+  }
+};
+
+// Admin obtiene métricas para el Dashboard
+exports.getMetricas = async (req, res) => {
+  try {
+    // 1. Solicitudes por estado
+    const metricasEstados = await Solicitud.aggregate([
+      { $group: { _id: "$estado", count: { $sum: 1 } } }
+    ]);
+
+    // 2. Solicitudes por tipo de trámite (relacionado con TramiteType)
+    const metricasTiposRaw = await Solicitud.aggregate([
+      { $group: { _id: "$tramiteType_id", count: { $sum: 1 } } }
+    ]);
+
+    // Poblar los nombres de los trámites
+    const metricasTipos = await TramiteType.populate(metricasTiposRaw, { path: "_id", select: "nombre" });
+
+    // 3. Solicitudes recientes (últimos 30 días) agrupadas por fecha
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hace30Dias.getDate() - 30);
+
+    const metricasTiempo = await Solicitud.aggregate([
+      { $match: { createdAt: { $gte: hace30Dias } } },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } } // Ordenar por fecha ascendente
+    ]);
+
+    res.json({
+      estados: metricasEstados,
+      tipos: metricasTipos,
+      tiempo: metricasTiempo
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error obteniendo métricas administrativas", error });
   }
 };
 
