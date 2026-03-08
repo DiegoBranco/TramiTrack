@@ -1,5 +1,9 @@
 <template>
-  <v-container class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4" style="padding-top: 13px;" fluid>
+  <v-container
+    class="px-6 pb-6 px-sm-10 pb-sm-10 bg-grey-lighten-4"
+    style="padding-top: 13px"
+    fluid
+  >
     <AppBreadcrumbs class="mb-2" />
     <v-row>
       <v-col cols="12">
@@ -9,8 +13,8 @@
       </v-col>
     </v-row>
 
-    <v-row class="mb-10">
-      <v-col cols="12" md="6">
+    <v-row class="mb-10" justify="center">
+      <v-col cols="12" sm="8" md="4">
         <v-card
           class="pa-6 rounded-lg text-center fill-height d-flex flex-column align-center justify-center"
           elevation="1"
@@ -27,7 +31,7 @@
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
-            class="text-none "
+            class="text-none"
             @click="$router.push('/admin-tipo-tramite')"
           >
             Agregar Trámite
@@ -35,7 +39,7 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="6">
+      <v-col cols="12" sm="8" md="4">
         <v-card
           class="pa-6 rounded-lg text-center fill-height d-flex flex-column align-center justify-center"
           elevation="1"
@@ -164,7 +168,8 @@ const loadTramites = async () => {
     const data = await solicitudService.getAll();
     tramites.value = data.map((item) => ({
       _id: item._id,
-      estudiante: `${item.estudiante_id?.nombre || ""} ${item.estudiante_id?.apellido || ""}`.trim(),
+      estudiante:
+        `${item.estudiante_id?.nombre || ""} ${item.estudiante_id?.apellido || ""}`.trim(),
       tipo: item.tramiteType_id?.nombre || "N/A",
       fecha: solicitudService.formatDate(item.fecha_solicitud),
       estatus: item.estado,
