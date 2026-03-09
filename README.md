@@ -38,6 +38,10 @@ VITE_API_URL=http://localhost:3001
 MONGO_USER=
 MONGO_PASSWORD=
 MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/tramitrack
+
+# Jenkins
+JENKINS_ADMIN_ID=admin
+JENKINS_ADMIN_PASSWORD = 
 ```
 
 ## 3. Levantar Aplicación
