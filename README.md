@@ -66,6 +66,13 @@ En caso de querer usar jenkins se tiene que ejecutar es:
 pnpm dev:jenkins
 ```
 
+**Importante**
+Luego de levantar Jenkins, ejecutar lo siguiente para evitar errores:
+
+```
+docker exec -u root tramitrack-jenkins-1 chmod 666 /var/run/docker.sock
+```
+
 ---
 
 # Puntos de Acceso
