@@ -79,18 +79,6 @@
               {{ loginError }}
             </p>
           </v-form>
-
-          <div class="mt-8 text-center">
-            <span class="text-body-2 text-grey-darken-1">
-              ¿No tienes una cuenta?
-              <a
-                href="#"
-                class="text-secondary font-weight-bold text-decoration-none"
-              >
-                Regístrate
-              </a>
-            </span>
-          </div>
         </v-card>
 
         <p class="text-center text-caption text-grey-darken-1 mt-6">
