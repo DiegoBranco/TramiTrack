@@ -16,6 +16,7 @@ declare module 'vue' {
     AppHeader: typeof import('./components/AppHeader.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SocialPostModal: typeof import('./components/SocialPostModal.vue')['default']
     TramiteCard: typeof import('./components/TramiteCard.vue')['default']
   }
 }

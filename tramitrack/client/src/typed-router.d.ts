@@ -22,6 +22,7 @@ declare module 'vue-router/auto-routes' {
     '/admin-edit-tramite': RouteRecordInfo<'/admin-edit-tramite', '/admin-edit-tramite', Record<never, never>, Record<never, never>>,
     '/admin-home': RouteRecordInfo<'/admin-home', '/admin-home', Record<never, never>, Record<never, never>>,
     '/admin-info-tramite': RouteRecordInfo<'/admin-info-tramite', '/admin-info-tramite', Record<never, never>, Record<never, never>>,
+    '/admin-metricas': RouteRecordInfo<'/admin-metricas', '/admin-metricas', Record<never, never>, Record<never, never>>,
     '/admin-profile': RouteRecordInfo<'/admin-profile', '/admin-profile', Record<never, never>, Record<never, never>>,
     '/admin-tipo-tramite': RouteRecordInfo<'/admin-tipo-tramite', '/admin-tipo-tramite', Record<never, never>, Record<never, never>>,
     '/home': RouteRecordInfo<'/home', '/home', Record<never, never>, Record<never, never>>,
@@ -59,6 +60,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/admin-info-tramite.vue': {
       routes: '/admin-info-tramite'
+      views: never
+    }
+    'src/pages/admin-metricas.vue': {
+      routes: '/admin-metricas'
       views: never
     }
     'src/pages/admin-profile.vue': {

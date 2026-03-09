@@ -28,13 +28,18 @@ TEST_PLAN=$(ls /tests/plans/*.jmx | head -1)
 RUN_TS=$(date +%Y%m%d-%H%M%S)
 RESULTS_FILE="/tests/results/resultado-${RUN_TS}.jtl"
 REPORT_DIR="/tests/reports/${RUN_TS}"
+TARGET_HOST="${JMETER_HOST:-host.docker.internal}"
+TARGET_PORT="${JMETER_PORT:-3001}"
 
 echo "Plan de pruebas: $TEST_PLAN"
 echo "Resultados: $RESULTS_FILE"
 echo "Reporte: $REPORT_DIR"
+echo "Target API: http://${TARGET_HOST}:${TARGET_PORT}"
 
 jmeter -n \
     -t "$TEST_PLAN" \
+    -Jhost="$TARGET_HOST" \
+    -Jport="$TARGET_PORT" \
     -l "$RESULTS_FILE" \
     -j /tests/jmeter.log \
     -e -o "$REPORT_DIR"

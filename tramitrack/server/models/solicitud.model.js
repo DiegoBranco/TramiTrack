@@ -1,5 +1,15 @@
 const mongoose = require("mongoose");
 
+const counterSchema = new mongoose.Schema(
+  {
+    _id: { type: String, required: true },
+    seq: { type: Number, default: 0 },
+  },
+  { versionKey: false },
+);
+
+const Counter = mongoose.models.Counter || mongoose.model("Counter", counterSchema);
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CEDULA_RUT_REGEX = /^(?:\d{6,12}|\d{1,2}\.?\d{3}\.?\d{3}-?[\dkK])$/;
 
@@ -62,6 +72,10 @@ const solicitudSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "PaymentStub",
     },
+    constancia_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Constancia",
+    },
     documento_final: { type: String },
   },
   { timestamps: true },
@@ -70,8 +84,29 @@ const solicitudSchema = new mongoose.Schema(
 // Genera el número de seguimiento antes de guardar
 solicitudSchema.pre("save", async function () {
   if (!this.numero_seguimiento) {
-    const count = await mongoose.model("Solicitud").countDocuments();
-    this.numero_seguimiento = `TRM-${String(count + 1).padStart(6, "0")}`;
+    const lastSolicitud = await mongoose
+      .model("Solicitud")
+      .findOne({ numero_seguimiento: /^TRM-\d+$/ })
+      .sort({ numero_seguimiento: -1 })
+      .select("numero_seguimiento")
+      .lean();
+
+    const maxSeq = lastSolicitud
+      ? Number((lastSolicitud.numero_seguimiento || "").replace("TRM-", "")) || 0
+      : 0;
+
+    await Counter.findByIdAndUpdate(
+      "solicitud",
+      { $max: { seq: maxSeq } },
+      { upsert: true, setDefaultsOnInsert: true },
+    );
+
+    const counter = await Counter.findByIdAndUpdate(
+      "solicitud",
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true, setDefaultsOnInsert: true },
+    );
+    this.numero_seguimiento = `TRM-${String(counter.seq).padStart(6, "0")}`;
   }
 });
 
