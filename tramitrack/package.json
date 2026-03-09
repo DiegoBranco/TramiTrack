@@ -1,12 +1,12 @@
 {
-    "scripts": {
-        "dev": "docker-compose up",
-        "dev:jenkins": "docker-compose -f docker-compose.yml -f docker-compose.jenkins.yml up",
-        "down": "docker-compose down",
-        "logs": "docker-compose logs -f"
-    },
-    "devDependencies": {
-        "cypress": "^15.11.0",
-        "jest": "^30.2.0"
-    }
+  "scripts": {
+    "dev": "docker-compose up",
+    "dev:jenkins": "docker-compose -f docker-compose.yml -f docker-compose.jenkins.yml up -d && docker logs -f tramitrack-jenkins-1",
+    "down": "docker-compose down",
+    "logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "cypress": "^15.11.0",
+    "jest": "^30.2.0"
+  }
 }

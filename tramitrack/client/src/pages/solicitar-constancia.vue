@@ -260,7 +260,7 @@
                     density="compact"
                     hide-details="auto"
                     class="mt-0"
-                    :rules="[rules.required]"
+                    :rules="[rules.required, rules.numeric]"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
@@ -276,7 +276,7 @@
                     density="compact"
                     hide-details="auto"
                     class="mt-0"
-                    :rules="[rules.required]"
+                    :rules="[rules.required, rules.numeric]"
                   ></v-text-field>
                 </v-col>
 
