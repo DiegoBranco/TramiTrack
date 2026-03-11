@@ -29,7 +29,7 @@
       }
     },
     {
-      "name": "1. Setup - Obtener Usuario del Seed",
+      "name": "1. Setup - Obtener Usuario del Seed ",
       "event": [
         {
           "listen": "test",
